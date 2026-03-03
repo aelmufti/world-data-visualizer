@@ -1,0 +1,28 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# API Keys and credentials
+API_KEY.txt
+serviceAccountKey.json
+*-key.json
+*-credentials.json
+firebase-adminsdk-*.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Google Cloud credentials
+gcloud-credentials.json
+application_default_credentials.json

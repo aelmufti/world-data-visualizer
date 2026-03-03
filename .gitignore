@@ -1,27 +1,3 @@
-# Dependencies
-node_modules
-
-# Build output
-dist
-dist-ssr
-*.local
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.DS_Store
-
 # Logs
 logs
 *.log
@@ -30,3 +6,43 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# API Keys and credentials
+**/API_KEY.txt
+**/serviceAccountKey.json
+**/*-key.json
+**/*-credentials.json
+**/firebase-adminsdk-*.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Google Cloud credentials
+gcloud-credentials.json
+application_default_credentials.json
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

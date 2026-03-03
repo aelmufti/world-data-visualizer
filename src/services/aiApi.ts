@@ -147,7 +147,33 @@ export async function generateText(prompt: string, preferredProvider?: AIProvide
 
 // Génère des actualités JSON
 export async function generateNews(sectorLabel: string, sectorId: string, preferredProvider?: AIProvider): Promise<any[]> {
-  // Récupère d'abord les actualités récentes du web
+  // Try to get real news articles from the aggregator first
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/news/${encodeURIComponent(sectorLabel)}`)
+    const data = await response.json()
+    
+    console.log(`[generateNews] Fetched ${data.articles?.length || 0} articles for ${sectorLabel}`)
+    
+    if (data.articles && data.articles.length > 0) {
+      // Return real news articles with URLs
+      console.log('[generateNews] Returning real news with URLs:', data.articles.map((a: any) => ({ title: a.title, hasUrl: !!a.url })))
+      return data.articles.map((article: any) => ({
+        title: article.title,
+        summary: article.snippet,
+        impact: "neutre", // Could be enhanced with sentiment analysis
+        category: article.source,
+        date: article.date,
+        url: article.url,
+        source: article.source
+      }))
+    }
+    
+    console.log('[generateNews] No articles found, falling back to AI generation')
+  } catch (error) {
+    console.error('Error fetching real news:', error)
+  }
+  
+  // Fallback: Récupère les actualités récentes du web pour le contexte AI
   const recentNews = await fetchRecentNews(sectorLabel)
   
   // Récupère le framework d'analyse du secteur

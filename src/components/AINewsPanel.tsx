@@ -91,11 +91,44 @@ export default function AINewsPanel({ sector }: Props) {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#F1F5F9", marginBottom: 4, lineHeight: 1.4 }}>{item.title}</div>
                   <div style={{ fontSize: 12, color: "#94A3B8", lineHeight: 1.5 }}>{item.summary}</div>
-                  {item.date && (
-                    <div style={{ fontSize: 10, color: "#475569", marginTop: 4, fontFamily: "'DM Mono', monospace" }}>
-                      📅 {item.date}
-                    </div>
-                  )}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                    {item.date && (
+                      <div style={{ fontSize: 10, color: "#475569", fontFamily: "'DM Mono', monospace" }}>
+                        📅 {item.date}
+                      </div>
+                    )}
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: 10,
+                          color: "#60A5FA",
+                          background: "rgba(96,165,250,0.1)",
+                          border: "1px solid rgba(96,165,250,0.2)",
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          textDecoration: "none",
+                          fontFamily: "'DM Mono', monospace",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          transition: "all 0.2s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "rgba(96,165,250,0.2)"
+                          e.currentTarget.style.borderColor = "rgba(96,165,250,0.4)"
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "rgba(96,165,250,0.1)"
+                          e.currentTarget.style.borderColor = "rgba(96,165,250,0.2)"
+                        }}
+                      >
+                        🔗 Source
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
                   <span style={{ fontSize: 10, color: impactColor[item.impact], background: `${impactColor[item.impact]}22`, padding: "2px 8px", borderRadius: 99, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>

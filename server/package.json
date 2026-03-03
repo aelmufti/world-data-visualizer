@@ -1,0 +1,35 @@
+{
+  "name": "financial-news-api",
+  "version": "1.0.0",
+  "description": "Financial news API with Firebase",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "worker": "tsx src/worker.ts",
+    "rss-worker": "tsx src/rss-worker.ts"
+  },
+  "dependencies": {
+    "@types/xml2js": "^0.4.14",
+    "axios": "^1.6.5",
+    "compromise": "^14.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "node-cache": "^5.1.2",
+    "sentiment": "^5.0.2",
+    "ws": "^8.16.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.5",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
