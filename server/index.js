@@ -117,30 +117,37 @@ app.get('/api/news/:sector', async (req, res) => {
     if (newsApiKey && newsApiKey !== 'your_newsapi_key_here' && newsApiKey.trim() !== '') {
       try {
         console.log(`Fetching from NewsAPI for sector: ${sector}`)
-        const newsUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keywords)}&language=en&sortBy=publishedAt&pageSize=5&apiKey=${newsApiKey}`
+        // Récupère uniquement les actualités d'aujourd'hui
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const todayISO = today.toISOString().split('T')[0]
+        
+        const newsUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keywords)}&language=en&sortBy=publishedAt&from=${todayISO}&pageSize=10&apiKey=${newsApiKey}`
         const newsResponse = await fetch(newsUrl)
         const newsData = await newsResponse.json()
         
         if (newsData.status === 'ok' && newsData.articles && newsData.articles.length > 0) {
-          const news = newsData.articles.slice(0, 4).map(article => {
+          // Filtre pour ne garder que les actualités d'aujourd'hui
+          const todayStart = new Date()
+          todayStart.setHours(0, 0, 0, 0)
+          
+          const todayArticles = newsData.articles.filter(article => {
+            const publishedDate = new Date(article.publishedAt)
+            return publishedDate >= todayStart
+          })
+          
+          const news = todayArticles.slice(0, 4).map(article => {
             const publishedDate = new Date(article.publishedAt)
             const now = new Date()
             const diffMs = now - publishedDate
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-            const diffDays = Math.floor(diffHours / 24)
             
             let dateStr
             if (diffHours < 1) {
               const diffMins = Math.floor(diffMs / (1000 * 60))
               dateStr = `Il y a ${diffMins} min`
-            } else if (diffHours < 24) {
-              dateStr = `Il y a ${diffHours}h`
-            } else if (diffDays === 1) {
-              dateStr = 'Hier'
-            } else if (diffDays < 7) {
-              dateStr = `Il y a ${diffDays} jours`
             } else {
-              dateStr = publishedDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+              dateStr = `Il y a ${diffHours}h`
             }
             
             return {
@@ -153,7 +160,7 @@ app.get('/api/news/:sector', async (req, res) => {
             }
           })
           
-          console.log(`✓ NewsAPI returned ${news.length} articles`)
+          console.log(`✓ NewsAPI returned ${news.length} articles from today`)
           return res.json({ news, timestamp: new Date().toISOString(), source: 'NewsAPI' })
         } else {
           console.log('NewsAPI returned no articles or error:', newsData.message)
@@ -182,6 +189,9 @@ app.get('/api/news/:sector', async (req, res) => {
       const descRegex = /<description>(.*?)<\/description>/
       const dateRegex = /<pubDate>(.*?)<\/pubDate>/
       
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      
       const news = []
       let match
       
@@ -191,27 +201,22 @@ app.get('/api/news/:sector', async (req, res) => {
         const descMatch = descRegex.exec(item)
         const dateMatch = dateRegex.exec(item)
         
-        if (titleMatch) {
-          let dateStr = 'Récent'
-          if (dateMatch) {
-            const publishedDate = new Date(dateMatch[1])
-            const now = new Date()
-            const diffMs = now - publishedDate
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-            const diffDays = Math.floor(diffHours / 24)
-            
-            if (diffHours < 1) {
-              const diffMins = Math.floor(diffMs / (1000 * 60))
-              dateStr = `Il y a ${diffMins} min`
-            } else if (diffHours < 24) {
-              dateStr = `Il y a ${diffHours}h`
-            } else if (diffDays === 1) {
-              dateStr = 'Hier'
-            } else if (diffDays < 7) {
-              dateStr = `Il y a ${diffDays} jours`
-            } else {
-              dateStr = publishedDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
-            }
+        if (titleMatch && dateMatch) {
+          const publishedDate = new Date(dateMatch[1])
+          
+          // Ne garde que les actualités d'aujourd'hui
+          if (publishedDate < todayStart) continue
+          
+          const now = new Date()
+          const diffMs = now - publishedDate
+          const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+          
+          let dateStr
+          if (diffHours < 1) {
+            const diffMins = Math.floor(diffMs / (1000 * 60))
+            dateStr = `Il y a ${diffMins} min`
+          } else {
+            dateStr = `Il y a ${diffHours}h`
           }
           
           news.push({
@@ -224,7 +229,7 @@ app.get('/api/news/:sector', async (req, res) => {
       }
       
       if (news.length > 0) {
-        console.log(`✓ Bing News returned ${news.length} articles`)
+        console.log(`✓ Bing News returned ${news.length} articles from today`)
         return res.json({ news, timestamp: new Date().toISOString(), source: 'Bing News' })
       }
     } catch (error) {
@@ -243,6 +248,9 @@ app.get('/api/news/:sector', async (req, res) => {
       const descRegex = /<description><!\[CDATA\[(.*?)\]\]><\/description>/
       const dateRegex = /<pubDate>(.*?)<\/pubDate>/
       
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      
       const news = []
       let match
       
@@ -252,27 +260,22 @@ app.get('/api/news/:sector', async (req, res) => {
         const descMatch = descRegex.exec(item)
         const dateMatch = dateRegex.exec(item)
         
-        if (titleMatch) {
-          let dateStr = 'Récent'
-          if (dateMatch) {
-            const publishedDate = new Date(dateMatch[1])
-            const now = new Date()
-            const diffMs = now - publishedDate
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-            const diffDays = Math.floor(diffHours / 24)
-            
-            if (diffHours < 1) {
-              const diffMins = Math.floor(diffMs / (1000 * 60))
-              dateStr = `Il y a ${diffMins} min`
-            } else if (diffHours < 24) {
-              dateStr = `Il y a ${diffHours}h`
-            } else if (diffDays === 1) {
-              dateStr = 'Hier'
-            } else if (diffDays < 7) {
-              dateStr = `Il y a ${diffDays} jours`
-            } else {
-              dateStr = publishedDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
-            }
+        if (titleMatch && dateMatch) {
+          const publishedDate = new Date(dateMatch[1])
+          
+          // Ne garde que les actualités d'aujourd'hui
+          if (publishedDate < todayStart) continue
+          
+          const now = new Date()
+          const diffMs = now - publishedDate
+          const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+          
+          let dateStr
+          if (diffHours < 1) {
+            const diffMins = Math.floor(diffMs / (1000 * 60))
+            dateStr = `Il y a ${diffMins} min`
+          } else {
+            dateStr = `Il y a ${diffHours}h`
           }
           
           news.push({
@@ -285,7 +288,7 @@ app.get('/api/news/:sector', async (req, res) => {
       }
       
       if (news.length > 0) {
-        console.log(`✓ Google News returned ${news.length} articles`)
+        console.log(`✓ Google News returned ${news.length} articles from today`)
         return res.json({ news, timestamp: new Date().toISOString(), source: 'Google News RSS' })
       }
     } catch (error) {

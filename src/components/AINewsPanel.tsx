@@ -16,7 +16,7 @@ export default function AINewsPanel({ sector }: Props) {
     setNews(null)
     
     try {
-      const newsData = await generateNews(sector.label)
+      const newsData = await generateNews(sector.label, sector.id)
       setNews(newsData)
       setLastUpdate(new Date())
     } catch (error) {
@@ -30,7 +30,7 @@ export default function AINewsPanel({ sector }: Props) {
     }
     
     setLoading(false)
-  }, [sector.label])
+  }, [sector.label, sector.id])
 
   useEffect(() => {
     fetchNews()

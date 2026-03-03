@@ -1,5 +1,7 @@
 // Service pour les analyses IA - supporte Ollama (local) et Claude (API)
 
+import { getSectorAnalysisContext } from '../data/sectorAnalysisFramework'
+
 const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434'
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -144,22 +146,34 @@ export async function generateText(prompt: string, preferredProvider?: AIProvide
 }
 
 // Génère des actualités JSON
-export async function generateNews(sectorLabel: string, preferredProvider?: AIProvider): Promise<any[]> {
+export async function generateNews(sectorLabel: string, sectorId: string, preferredProvider?: AIProvider): Promise<any[]> {
   // Récupère d'abord les actualités récentes du web
   const recentNews = await fetchRecentNews(sectorLabel)
   
+  // Récupère le framework d'analyse du secteur
+  const analysisContext = getSectorAnalysisContext(sectorId)
+  
   const contextInfo = recentNews 
-    ? `\n\nActualités récentes trouvées sur le web:\n${recentNews}\n\nUtilise ces informations RÉCENTES pour créer des actualités réalistes et actuelles. IMPORTANT: Inclus la date de chaque actualité dans le champ "date" au format "Il y a Xh" ou "Il y a X jours" pour montrer que c'est récent.`
+    ? `\n\nActualités récentes trouvées sur le web (AUJOURD'HUI uniquement):\n${recentNews}\n\nUtilise ces informations RÉCENTES D'AUJOURD'HUI pour créer des actualités réalistes et actuelles. IMPORTANT: Toutes les actualités doivent être d'aujourd'hui (${new Date().toLocaleDateString('fr-FR')}). Inclus la date de chaque actualité dans le champ "date" au format "Il y a Xh" ou "Il y a X min" pour montrer que c'est d'aujourd'hui.`
     : ''
   
-  const prompt = `Tu es un analyste financier senior. Nous sommes le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.
+  const prompt = `Tu es un analyste financier senior spécialisé dans l'analyse causale des marchés. Nous sommes le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.
 
-Pour le secteur "${sectorLabel}", génère 4 actualités fictives mais réalistes basées sur les vraies actualités récentes en JSON strict.${contextInfo}
-Format OBLIGATOIRE (JSON uniquement, aucun texte autour) :
-{"news":[{"title":"...","summary":"...","impact":"positif"|"negatif"|"neutre","category":"...","date":"..."},...]}
-Les catégories possibles: Géopolitique, Réglementation, Résultats, Macro, M&A, Technologie
+${analysisContext}
 
-Important: Base-toi STRICTEMENT sur les actualités récentes fournies ci-dessus pour créer du contenu pertinent et actuel. Utilise des dates récentes comme "Il y a 2h", "Il y a 5h", "Aujourd'hui", "Hier".`
+Pour le secteur "${sectorLabel}", génère 4 actualités fictives mais réalistes basées sur les vraies actualités récentes D'AUJOURD'HUI en JSON strict.${contextInfo}
+
+IMPORTANT - Applique les 3 filtres d'analyse:
+1. Offre/Demande: Précise si l'actualité impacte l'offre ou la demande
+2. Temporel: Indique si c'est structurel (>5 ans) ou conjoncturel (<1 an)
+3. Prix: Mentionne si c'est une surprise ou déjà anticipé par le marché
+
+Format OBLIGATOIRE (JSON uniquement, aucun texte autour):
+{"news":[{"title":"...","summary":"... [Mentionne: Impact offre/demande, Horizon temporel, Surprise ou priced-in]","impact":"positif"|"negatif"|"neutre","category":"...","date":"..."},...]}
+
+Les catégories possibles: Géopolitique, Réglementation, Résultats, Macro, M&A, Technologie, Supply Chain
+
+Base-toi STRICTEMENT sur les actualités récentes D'AUJOURD'HUI et le framework d'analyse fournis. Utilise UNIQUEMENT des dates d'aujourd'hui comme "Il y a 2h", "Il y a 5h", "Il y a 30 min". PAS de dates d'hier ou plus anciennes.`
 
   try {
     const { text } = await generateText(prompt, preferredProvider)
