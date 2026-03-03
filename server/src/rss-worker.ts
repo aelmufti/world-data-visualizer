@@ -35,6 +35,76 @@ const RSS_SOURCES = [
     name: 'Bloomberg',
     url: 'https://www.bloomberg.com/feed/podcast/etf-report.xml',
     domain: 'bloomberg.com'
+  },
+  {
+    name: 'Financial Times',
+    url: 'https://www.ft.com/?format=rss',
+    domain: 'ft.com'
+  },
+  {
+    name: 'The Wall Street Journal',
+    url: 'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
+    domain: 'wsj.com'
+  },
+  {
+    name: 'Barrons',
+    url: 'https://feeds.a.dj.com/rss/RSSBarronsOnline.xml',
+    domain: 'barrons.com'
+  },
+  {
+    name: 'Investor\'s Business Daily',
+    url: 'https://www.investors.com/feed/',
+    domain: 'investors.com'
+  },
+  {
+    name: 'Forbes Markets',
+    url: 'https://www.forbes.com/markets/feed/',
+    domain: 'forbes.com'
+  },
+  {
+    name: 'Business Insider',
+    url: 'https://markets.businessinsider.com/rss/news',
+    domain: 'businessinsider.com'
+  },
+  {
+    name: 'TechCrunch',
+    url: 'https://techcrunch.com/feed/',
+    domain: 'techcrunch.com'
+  },
+  {
+    name: 'The Verge',
+    url: 'https://www.theverge.com/rss/index.xml',
+    domain: 'theverge.com'
+  },
+  {
+    name: 'Ars Technica',
+    url: 'https://feeds.arstechnica.com/arstechnica/index',
+    domain: 'arstechnica.com'
+  },
+  {
+    name: 'VentureBeat',
+    url: 'https://venturebeat.com/feed/',
+    domain: 'venturebeat.com'
+  },
+  {
+    name: 'BioPharma Dive',
+    url: 'https://www.biopharmadive.com/feeds/news/',
+    domain: 'biopharmadive.com'
+  },
+  {
+    name: 'FiercePharma',
+    url: 'https://www.fiercepharma.com/rss/xml',
+    domain: 'fiercepharma.com'
+  },
+  {
+    name: 'Oil Price',
+    url: 'https://oilprice.com/rss/main',
+    domain: 'oilprice.com'
+  },
+  {
+    name: 'Renewable Energy World',
+    url: 'https://www.renewableenergyworld.com/feed/',
+    domain: 'renewableenergyworld.com'
   }
 ];
 
@@ -125,12 +195,7 @@ class RSSWorker {
       const companies = await this.getCompanies();
       const result = nlpProcessor.process(articleData, companies);
 
-      if (result.detectedCompanies.length === 0) {
-        console.log(`⏭️  No companies detected: ${articleData.title.substring(0, 50)}...`);
-        return;
-      }
-
-      // Save article
+      // Save article (même sans entreprise détectée)
       const articleRef = await db.collection(collections.articles).add({
         url: articleData.url,
         title: articleData.title,
@@ -173,7 +238,10 @@ class RSSWorker {
       }
 
       const latency = (Date.now() - articleData.publishedAt.getTime()) / 1000;
-      console.log(`✅ Processed: ${articleData.title.substring(0, 50)}... (${result.detectedCompanies.map(c => c.ticker).join(', ')}) - ${latency.toFixed(0)}s latency`);
+      const companiesStr = result.detectedCompanies.length > 0 
+        ? result.detectedCompanies.map(c => c.ticker).join(', ')
+        : 'no companies';
+      console.log(`✅ ${articleData.title.substring(0, 60)}... [${companiesStr}] - ${latency.toFixed(0)}s`);
     } catch (error: any) {
       console.error('Error processing article:', error.message);
     }
@@ -197,9 +265,9 @@ class RSSWorker {
         console.error('Error in worker loop:', error.message);
       }
 
-      // Wait 5 minutes before next poll
-      console.log('⏳ Waiting 5 minutes before next poll...');
-      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+      // Wait 1 minute before next poll
+      console.log('⏳ Waiting 1 minute before next poll...');
+      await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000));
     }
   }
 }

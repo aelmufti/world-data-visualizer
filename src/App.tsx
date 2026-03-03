@@ -1,14 +1,24 @@
 import { useState } from 'react'
 import { SECTORS } from './data/sectors'
 import { useAIProvider } from './hooks/useAIProvider'
+import { useMarketData } from './hooks/useMarketData'
 import AINewsPanel from './components/AINewsPanel'
+import VesselMap from './components/VesselMap'
+import { useAIS } from './contexts/AISContext'
 
 export default function App() {
   const [activeSector, setActiveSector] = useState(SECTORS[0])
   const [alertMsg, setAlertMsg] = useState<string | null>(null)
+  const [showMap, setShowMap] = useState(false)
 
   // Détecte le provider IA disponible
   const { ollamaAvailable, ollamaModels } = useAIProvider()
+  
+  // Récupère les données de marché réelles
+  const { indicators: realIndicators, loading: loadingMarket } = useMarketData(activeSector.id)
+  
+  // Récupère les données AIS en temps réel
+  const { vesselCount, connected: aisConnected } = useAIS()
 
   return (
     <div style={{ minHeight: "100vh", background: "#060B14", color: "#E2E8F0", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
@@ -72,6 +82,9 @@ export default function App() {
             {ollamaAvailable && ollamaModels.length > 0 && (
               <div style={{ fontSize: 8, color: "#1E293B" }}>{ollamaModels[0]}</div>
             )}
+            <div style={{ fontSize: 9, color: aisConnected ? "#10B981" : "#64748B", marginTop: 4 }}>
+              🗺️ AIS: {aisConnected ? `${vesselCount} navires` : 'Connexion...'}
+            </div>
           </div>
         </div>
       </div>
@@ -98,11 +111,46 @@ export default function App() {
 
             {/* Macro Indicators */}
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase", marginBottom: 16 }}>Indicateurs Macro</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase", marginBottom: 16 }}>
+                Indicateurs Macro {loadingMarket && <span style={{ fontSize: 10, color: "#475569" }}>(chargement...)</span>}
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {activeSector.indicators.map((ind, i) => (
-                  <div key={i} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 11, color: "#475569", marginBottom: 4 }}>{ind.label}</div>
+                {(realIndicators.length > 0 ? realIndicators : activeSector.indicators).map((ind, i) => (
+                  <div 
+                    key={i} 
+                    onClick={() => {
+                      if (ind.label === "WTI Crude" && activeSector.id === "energie") {
+                        setShowMap(true)
+                      }
+                    }}
+                    style={{ 
+                      background: "rgba(255,255,255,0.03)", 
+                      border: "1px solid rgba(255,255,255,0.06)", 
+                      borderRadius: 8, 
+                      padding: "12px 14px",
+                      cursor: ind.label === "WTI Crude" && activeSector.id === "energie" ? "pointer" : "default",
+                      transition: "all 0.2s",
+                      position: "relative"
+                    }}
+                    onMouseEnter={(e) => {
+                      if (ind.label === "WTI Crude" && activeSector.id === "energie") {
+                        e.currentTarget.style.background = "rgba(245,158,11,0.1)"
+                        e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (ind.label === "WTI Crude" && activeSector.id === "energie") {
+                        e.currentTarget.style.background = "rgba(255,255,255,0.03)"
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"
+                      }
+                    }}
+                  >
+                    <div style={{ fontSize: 11, color: "#475569", marginBottom: 4 }}>
+                      {ind.label}
+                      {ind.label === "WTI Crude" && activeSector.id === "energie" && (
+                        <span style={{ marginLeft: 6, fontSize: 10 }}>🗺️</span>
+                      )}
+                    </div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9", fontFamily: "'DM Mono', monospace" }}>{ind.value}</div>
                     <div style={{ fontSize: 11, color: ind.up === true ? "#10B981" : ind.up === false ? "#EF4444" : "#64748B", marginTop: 2 }}>
                       {ind.up === true ? "▲ " : ind.up === false ? "▼ " : ""}{ind.delta}
@@ -142,6 +190,9 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Vessel Map Modal */}
+      {showMap && <VesselMap onClose={() => setShowMap(false)} />}
     </div>
   )
 }

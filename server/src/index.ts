@@ -1,15 +1,31 @@
 import express from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
 import { db, collections } from './firebase.js';
 import { nlpProcessor } from './nlp.js';
 import NodeCache from 'node-cache';
+import aggregationRouter from './aggregation-endpoint.js';
+import marketDataRouter from './market-data-endpoint.js';
+import { setupAISProxy } from './ais-proxy.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 const cache = new NodeCache({ stdTTL: 60 });
 
+// Créer un serveur HTTP pour supporter WebSocket
+const server = createServer(app);
+
 app.use(cors());
 app.use(express.json());
+
+// Setup AIS WebSocket proxy
+setupAISProxy(server);
+
+// Routes d'agrégation intelligente
+app.use('/api/aggregated', aggregationRouter);
+
+// Routes de données de marché
+app.use('/api', marketDataRouter);
 
 // Middleware: API Key verification
 const verifyApiKey = async (req: any, res: any, next: any) => {
@@ -250,6 +266,6 @@ app.get('/trending', verifyApiKey, rateLimiter, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Financial News API running on port ${PORT}`);
 });

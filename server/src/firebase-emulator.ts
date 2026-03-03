@@ -1,10 +1,13 @@
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Initialize Firebase Admin for emulator
 if (!admin.apps.length) {
   admin.initializeApp({
-    projectId: 'world-data-visualizer',
+    projectId: process.env.FIREBASE_PROJECT_ID || 'world-data-visualizer',
   });
 }
 

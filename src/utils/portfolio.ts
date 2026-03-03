@@ -1,4 +1,9 @@
-import type { Stock } from '../data/sectors'
+// Legacy portfolio utilities - not currently used
+interface Stock {
+  shares: number
+  price: number
+  buy: number
+}
 
 export function calcPortfolioValue(stocks: Stock[]): number {
   return stocks.reduce((s, st) => s + st.shares * st.price, 0)

@@ -1,159 +1,293 @@
-🚀 Installation & Lancement
-Prérequis
+# 📊 Financial News Aggregator & Portfolio Dashboard
 
-Node.js ≥ 18
-Une clé API Anthropic (pour les fonctionnalités IA)
+Système d'agrégation d'actualités financières avec analyse sectorielle intelligente et scoring avancé.
 
-Installation
+## 🎯 Fonctionnalités
+
+- **Agrégation multi-sources**: RSS feeds (Yahoo Finance, MarketWatch, Seeking Alpha, CNBC, Bloomberg)
+- **Scoring intelligent**: Pertinence sectorielle + importance événementielle + sentiment + recency decay
+- **10 secteurs couverts**: Technology, Finance, Healthcare, Energy, Consumer, Industrial, Materials, Real Estate, Utilities, Telecom
+- **Carte interactive AIS**: Suivi en temps réel des pétroliers (WTI Crude) avec données aisstream.io
+- **API REST**: Endpoints pour récupérer les articles par secteur ou globalement
+- **Frontend React**: Interface moderne avec Tailwind CSS
+- **Firebase/Firestore**: Base de données temps réel avec émulateur local
+
+## 🚀 Installation Rapide
+
+### Prérequis
+- Node.js ≥ 18
+- Firebase CLI (pour l'émulateur Firestore)
+- Une clé API Firebase (optionnel pour production)
+
+### Installation
+
 ```bash
 # Cloner le projet
-git clone https://github.com/ton-user/portfolio-dashboard.git
-cd portfolio-dashboard
+git clone <your-repo-url>
+cd world-data-visualizer
 
-# Installer les dépendances
+# Installer les dépendances (root)
 npm install
 
-# Lancer le serveur proxy ET le frontend
-npm run dev:all
-
-# Ou lancer séparément:
-# Terminal 1: npm run server
-# Terminal 2: npm run dev
+# Installer les dépendances (server)
+cd server
+npm install
+cd ..
 ```
 
-Configuration des clés API
-Crée un fichier .env à la racine du projet :
+### Configuration
+
+1. **Frontend** - Créer `.env` à la racine:
 ```env
-VITE_ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+# Clé API Anthropic (pour Claude)
+VITE_ANTHROPIC_API_KEY=your_anthropic_key_here
 
-# URL du serveur proxy (optionnel)
-VITE_API_URL=http://localhost:3001
+# URL du serveur backend
+VITE_API_URL=http://localhost:8000
 
-# NewsAPI pour actualités en temps réel (gratuit, 100 requêtes/jour)
-# Obtenir une clé sur: https://newsapi.org/register
+# AIS Stream API (optionnel, pour suivi pétroliers en temps réel)
+# Inscription gratuite sur: https://aisstream.io
+VITE_AISSTREAM_API_KEY=your_aisstream_api_key_here
+
+# NewsAPI (optionnel, 100 requêtes/jour gratuit)
 NEWS_API_KEY=your_newsapi_key_here
-
-# ============================================================================
-# News Aggregator Configuration (Optionnel - Valeurs par défaut ci-dessous)
-# ============================================================================
-
-# NewsAPI Configuration
-NEWSAPI_ENABLED=true              # Activer/désactiver NewsAPI
-NEWSAPI_TIMEOUT=3000              # Timeout en ms (défaut: 3000)
-NEWSAPI_MAX_ARTICLES=10           # Nombre max d'articles par source (défaut: 10)
-
-# Bing News Configuration
-BING_ENABLED=true                 # Activer/désactiver Bing News
-BING_TIMEOUT=3000                 # Timeout en ms (défaut: 3000)
-BING_MAX_ARTICLES=10              # Nombre max d'articles (défaut: 10)
-
-# Google News Configuration
-GOOGLE_ENABLED=true               # Activer/désactiver Google News
-GOOGLE_ENABLED=3000                # Timeout en ms (défaut: 3000)
-GOOGLE_MAX_ARTICLES=10            # Nombre max d'articles (défaut: 10)
-
-# Cache Configuration
-CACHE_ENABLED=true                # Activer/désactiver le cache (défaut: true)
-CACHE_TTL=900000                  # Durée de vie du cache en ms (défaut: 15 min)
-CACHE_MAX_SIZE=100                # Nombre max d'entrées en cache (défaut: 100)
-
-# Scoring Configuration (Poids pour le calcul de pertinence)
-SCORING_TITLE_WEIGHT=0.5          # Poids du titre (défaut: 0.5)
-SCORING_SNIPPET_WEIGHT=0.3        # Poids du snippet (défaut: 0.3)
-SCORING_RECENCY_WEIGHT=0.2        # Poids de la récence (défaut: 0.2)
-SCORING_KEYWORD_BONUS=0.1         # Bonus par mot-clé additionnel (défaut: 0.1)
-
-# Deduplication Configuration
-DEDUP_ENABLED=true                # Activer/désactiver la déduplication (défaut: true)
-DEDUP_THRESHOLD=0.7               # Seuil de similarité (0-1, défaut: 0.7)
-
-# Filtering Configuration
-FILTER_MIN_SCORE=0.3              # Score minimum de pertinence (défaut: 0.3)
-FILTER_FALLBACK_SCORE=0.2         # Score de secours si < 5 articles (défaut: 0.2)
-FILTER_MIN_ARTICLES=5             # Seuil pour activer le fallback (défaut: 5)
-FILTER_MAX_ARTICLES=20            # Nombre max d'articles retournés (défaut: 20)
 ```
 
-⚠️ Ne commite jamais tes clés API. Le fichier .env est ignoré par git.
-
-Le serveur proxy Node.js contourne les restrictions CORS et récupère les cours depuis Yahoo Finance.
-
-### Configuration de l'agrégateur d'actualités
-
-L'application utilise un système d'agrégation multi-sources pour récupérer des actualités pertinentes pour chaque secteur. Voici comment configurer le comportement de l'agrégateur :
-
-#### Sources d'actualités
-
-- **NewsAPI** : Nécessite une clé API (gratuite, 100 requêtes/jour). Obtenir une clé sur [newsapi.org](https://newsapi.org/register)
-- **Bing News** : Flux RSS public, aucune clé requise
-- **Google News** : Flux RSS public, aucune clé requise
-
-Vous pouvez activer/désactiver chaque source individuellement avec les variables `*_ENABLED`.
-
-#### Paramètres de performance
-
-- **Timeout** : Durée maximale d'attente par source (défaut: 3 secondes)
-- **Max Articles** : Nombre maximum d'articles à récupérer par source (défaut: 10)
-- **Cache TTL** : Durée de vie du cache (défaut: 15 minutes = 900000 ms)
-
-#### Scoring de pertinence
-
-Le système calcule un score de pertinence (0-1) pour chaque article basé sur :
-- **Title Weight** : Importance des mots-clés dans le titre (défaut: 50%)
-- **Snippet Weight** : Importance des mots-clés dans le snippet (défaut: 30%)
-- **Recency Weight** : Importance de la récence de l'article (défaut: 20%)
-- **Keyword Bonus** : Bonus pour chaque mot-clé supplémentaire trouvé (défaut: 0.1)
-
-#### Déduplication
-
-Le système détecte et élimine les doublons en comparant la similarité des titres :
-- **Threshold** : Seuil de similarité (défaut: 0.7 = 70%)
-- Articles avec similarité > seuil sont considérés comme doublons
-- L'article avec le meilleur score de pertinence est conservé
-
-#### Filtrage
-
-- **Min Score** : Score minimum pour qu'un article soit retourné (défaut: 0.3)
-- **Fallback Score** : Score de secours si moins de 5 articles (défaut: 0.2)
-- **Max Articles** : Nombre maximum d'articles dans la réponse (défaut: 20)
-
-
-🛠️ Stack Technique
-TechnologieUsageReact 18Framework UITailwind CSSStyling utilitaireClaude API (Anthropic)Génération d'actualités et analyses IADM Sans / DM MonoTypographie (Google Fonts)
-
-📁 Structure du projet
+2. **Backend** - Créer `server/.env`:
+```env
+PORT=8000
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_API_KEY=your_firebase_api_key_here
 ```
-portfolio-dashboard/
+
+⚠️ **Important**: Ne jamais commiter les fichiers `.env` (déjà dans `.gitignore`)
+
+### Lancement
+
+```bash
+# Terminal 1: Firestore Emulator
+cd server
+firebase emulators:start --only firestore
+
+# Terminal 2: Backend API
+cd server
+npm run dev
+
+# Terminal 3: RSS Worker (ingestion)
+cd server
+npm run rss-worker
+
+# Terminal 4: Frontend
+npm run dev
+```
+
+L'application sera accessible sur `http://localhost:5173`
+
+## 📡 API Endpoints
+
+### Articles par secteur
+```bash
+GET /api/aggregated/sector/:sector?limit=15
+
+# Exemples
+curl "http://localhost:8000/api/aggregated/sector/technology?limit=15"
+curl "http://localhost:8000/api/aggregated/sector/finance?limit=10"
+curl "http://localhost:8000/api/aggregated/sector/energy?limit=20"
+```
+
+**Secteurs disponibles**: `technology`, `finance`, `healthcare`, `energy`, `consumer`, `industrial`, `materials`, `real_estate`, `utilities`, `telecom`
+
+### Top articles globaux
+```bash
+GET /api/aggregated/top?limit=30
+
+curl "http://localhost:8000/api/aggregated/top?limit=50"
+```
+
+### Tous les secteurs
+```bash
+GET /api/aggregated/all?topPerSector=10
+
+curl "http://localhost:8000/api/aggregated/all?topPerSector=15"
+```
+
+## 🧮 Système de Scoring
+
+### Formule Finale
+```typescript
+finalScore = (relevanceScore × 0.6) + (importanceScore × 0.3) + (sentimentScore × 0.1) × decayFactor
+```
+
+### 1. Score de Pertinence (0-10)
+Basé sur les mots-clés sectoriels avec:
+- **Word-boundary matching**: Évite les faux positifs ("tech" ne matche pas "biotech")
+- **Position weighting**: Titre ×2.0, Lead ×1.5, Body ×1.0
+- **Courbe logarithmique**: `10 × (1 - e^(-matches × 0.4))`
+
+**Exemple**: Article Apple iPhone
+- Titre: 3 keywords (Apple, iPhone, iPad) × 2.0 = 6.0
+- Lead: 2 keywords (chip, M4) × 1.5 = 3.0
+- Score: 10 × (1 - e^(-9.0 × 0.4)) = 9.8/10
+
+### 2. Score d'Importance (1-10)
+Basé sur le type d'événement détecté:
+- M&A / Acquisition: 10
+- Action réglementaire: 9
+- Earnings beat/miss: 8
+- Licenciements / Procès: 7
+- Partenariat / Lancement produit: 6
+- Changement direction: 5
+- Par défaut: 3
+
+### 3. Score de Sentiment (0-10)
+```typescript
+sentimentScore = ((rawSentiment + 1) / 2) × 10
+// -1.0 (très négatif) → 0 points
+//  0.0 (neutre) → 5 points
+// +1.0 (très positif) → 10 points
+```
+
+### 4. Recency Decay
+```typescript
+ageInHours = (now - publishedAt) / 3600000
+decayFactor = e^(-0.15 × ageInHours)
+// Half-life: 4.6 heures
+// 0h = 100%, 4.6h = 50%, 9.2h = 25%, 24h = 2%
+```
+
+### Filtrage
+- Seuil minimum: `relevanceScore >= 1.0`
+- Tri: Par `finalScore` décroissant
+
+## 📊 Résultats Actuels
+
+Sur 111 articles RSS récupérés toutes les 5 minutes:
+- **Technology**: 15 articles (score moyen ~7.0)
+- **Finance**: 10 articles (score moyen ~6.5)
+- **Energy**: 10 articles (score moyen ~6.0)
+- **Consumer**: 8 articles
+- **Industrial**: 6 articles
+- **Materials**: 5 articles
+- **Telecom**: 4 articles
+- **Healthcare**: 4 articles
+- **Real Estate**: 3 articles
+- **Utilities**: 2 articles
+
+**Taux d'acceptation**: ~30% (30-35 articles passent le filtre)
+
+## 🔧 Architecture
+
+### Backend (`server/`)
+```
+server/
 ├── src/
-│   ├── App.tsx              # Composant principal
-│   ├── components/
-│   │   ├── AINewsPanel.tsx  # Panel actualités IA
-│   │   ├── AIAnalysis.tsx   # Analyse sectorielle IA
-│   │   └── Sparkline.tsx    # Mini graphique de tendance
-│   ├── data/
-│   │   └── sectors.ts       # Données des secteurs
-│   ├── hooks/
-│   │   └── useStockPrices.ts # Hook pour cours en temps réel
-│   ├── services/
-│   │   └── stockApi.ts      # API client pour les cours
-│   └── utils/
-│       └── portfolio.ts     # Fonctions de calcul
-├── server/
-│   └── index.js             # Serveur proxy Node.js
-├── .env                     # Clés API (non commité)
-├── .gitignore
-└── README.md
+│   ├── index.ts              # API Express
+│   ├── aggregator.ts         # Système de scoring
+│   ├── aggregation-endpoint.ts # Routes API
+│   ├── rss-worker.ts         # Ingestion RSS
+│   ├── nlp.ts                # Analyse NLP basique
+│   ├── firebase.ts           # Config Firebase
+│   └── types.ts              # Types TypeScript
+├── firebase.json             # Config Firebase
+├── firestore.rules           # Règles de sécurité
+└── package.json
 ```
 
-🔮 Évolutions prévues
+### Frontend (`src/`)
+```
+src/
+├── components/
+│   ├── AINewsPanel.tsx       # Panel actualités
+│   ├── AIAnalysis.tsx        # Analyse sectorielle
+│   └── Sparkline.tsx         # Graphiques
+├── data/
+│   ├── sectors.ts            # Définition secteurs
+│   └── sectorAnalysisFramework.ts
+├── hooks/
+│   ├── useAIProvider.ts      # Hook IA
+│   └── useStockPrices.ts     # Hook cours
+├── services/
+│   ├── aiApi.ts              # Client API IA
+│   └── stockApi.ts           # Client API stocks
+└── App.tsx                   # Composant principal
+```
 
- Import CSV/Excel pour charger ses vraies positions
- API de cours réels — intégration Yahoo Finance ou Alpha Vantage
- Persistance des alertes — sauvegarde en base de données
- Mode multi-portefeuille — comparer plusieurs stratégies
- Export PDF — rapport sectoriel hebdomadaire
- Notifications push — alertes en temps réel sur mobile
+## 📈 Améliorations Futures
 
+### Carte AIS Interactive
+La carte des pétroliers affiche actuellement des données de démonstration. Pour activer les données en temps réel:
 
-📄 Licence
-MIT — libre d'utilisation et de modification.
+1. **Créer un compte gratuit** sur [aisstream.io](https://aisstream.io)
+2. **Obtenir une clé API** (tier gratuit disponible)
+3. **Ajouter la clé** dans `.env`: `VITE_AISSTREAM_API_KEY=your_key`
+4. **Décommenter le code WebSocket** dans `src/components/OilTankerMap.tsx`
+
+**Sources de données AIS**:
+- **aisstream.io**: WebSocket API pour données AIS en temps réel (recommandé)
+- **OpenSeaMap / OpenCPN**: Données communautaires open-source
+- Filtrage automatique sur les pétroliers (types 80-89)
+
+### Priorité Haute
+- [ ] **TF-IDF**: Pondération des keywords rares (2-3h)
+- [ ] **Event Detection Confidence**: Éviter faux positifs sur événements importants (1h)
+- [ ] **Cross-Sector Dampening**: Éviter qu'un article score haut dans plusieurs secteurs (30min)
+
+### Priorité Moyenne
+- [ ] **Text Length Normalization**: Normaliser par longueur d'article
+- [ ] **Keyword Weighting**: Poids différents par keyword (entreprise > produit > terme générique)
+- [ ] **Percentile-Based Cutoff**: Filtre adaptatif au volume quotidien
+
+### Priorité Basse
+- [ ] **OpenAI/Claude NLP**: Détection avancée d'entreprises et événements
+- [ ] **Clustering**: Déduplication sémantique
+- [ ] **Redis Cache**: Performance améliorée
+- [ ] **Plus de sources RSS**: TechCrunch, WSJ, FT, etc.
+
+## 🛠️ Stack Technique
+
+| Technologie | Usage |
+|------------|-------|
+| TypeScript | Langage principal |
+| Node.js + Express | Backend API |
+| Firebase/Firestore | Base de données |
+| React 18 | Frontend |
+| Tailwind CSS | Styling |
+| Vite | Build tool |
+| RSS Parser | Ingestion feeds |
+| Compromise + Sentiment | NLP basique |
+
+## 📝 Documentation Détaillée
+
+- `server/SCORING_METHODOLOGY.md` - Méthodologie complète de scoring avec exemples
+- `server/SCORING_IMPROVEMENTS.md` - Historique des améliorations et fixes
+- `server/README.md` - Documentation backend spécifique
+- `SECURITY.md` - Bonnes pratiques de sécurité
+
+## 🔒 Sécurité
+
+- ✅ Toutes les clés API dans `.env` (non commité)
+- ✅ `.gitignore` configuré pour protéger les credentials
+- ✅ Firestore rules pour sécuriser la base
+- ✅ CORS configuré sur l'API
+- ✅ Validation des inputs
+
+**Checklist avant commit**:
+1. Vérifier qu'aucune clé API n'est hardcodée
+2. Vérifier que `.env` est dans `.gitignore`
+3. Vérifier que `API_KEY.txt` et `serviceAccountKey.json` sont ignorés
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/amazing-feature`)
+3. Commit les changements (`git commit -m 'Add amazing feature'`)
+4. Push vers la branche (`git push origin feature/amazing-feature`)
+5. Ouvrir une Pull Request
+
+## 📄 Licence
+
+MIT - Libre d'utilisation et de modification
+
+---
+
+**Dernière mise à jour**: 3 mars 2026

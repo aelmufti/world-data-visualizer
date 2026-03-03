@@ -1,19 +1,13 @@
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
+import dotenv from 'dotenv';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBw3eWwKeytqH8tBW79QnrmAWswj1h3LGo",
-  authDomain: "world-data-visualizer.firebaseapp.com",
-  projectId: "world-data-visualizer",
-  storageBucket: "world-data-visualizer.firebasestorage.app",
-  messagingSenderId: "459258221355",
-  appId: "1:459258221355:web:19bd5a95499402cbc52b6e"
-};
+dotenv.config();
 
 // Initialize Firebase Admin
 try {
   admin.initializeApp({
-    projectId: firebaseConfig.projectId,
+    projectId: process.env.FIREBASE_PROJECT_ID || 'world-data-visualizer',
   });
 } catch (error: any) {
   if (error.code !== 'app/duplicate-app') {
