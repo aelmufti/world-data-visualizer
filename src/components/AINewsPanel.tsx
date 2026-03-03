@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Sector } from '../data/sectors'
+import { generateNews } from '../services/aiApi'
 
 interface Props {
   sector: Sector
@@ -8,49 +9,28 @@ interface Props {
 export default function AINewsPanel({ sector }: Props) {
   const [news, setNews] = useState<any[] | null>(null)
   const [loading, setLoading] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
 
   const fetchNews = useCallback(async () => {
     setLoading(true)
     setNews(null)
+    
     try {
-      const prompt = `Tu es un analyste financier senior. Pour le secteur "${sector.label}", génère 4 actualités fictives mais réalistes du jour en JSON strict.
-Format OBLIGATOIRE (JSON uniquement, aucun texte autour) :
-{"news":[{"title":"...","summary":"...","impact":"positif"|"negatif"|"neutre","category":"..."},...]}
-Les catégories possibles: Géopolitique, Réglementation, Résultats, Macro, M&A, Technologie`
-
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-      if (!apiKey) {
-        throw new Error('API key missing')
-      }
-
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      })
-      const data = await res.json()
-      const text = data.content.map((b: any) => b.text || "").join("")
-      const clean = text.replace(/```json|```/g, "").trim()
-      const parsed = JSON.parse(clean)
-      setNews(parsed.news)
-    } catch (e) {
-      setNews([{ 
-        title: "Erreur de chargement", 
-        summary: "Impossible de récupérer les actualités.", 
-        impact: "neutre", 
-        category: "Système" 
+      const newsData = await generateNews(sector.label)
+      setNews(newsData)
+      setLastUpdate(new Date())
+    } catch (error) {
+      console.error('Error fetching news:', error)
+      setNews([{
+        title: "Erreur de chargement",
+        summary: "Impossible de récupérer les actualités.",
+        impact: "neutre",
+        category: "Système"
       }])
     }
+    
     setLoading(false)
-  }, [sector.id, sector.label])
+  }, [sector.label])
 
   useEffect(() => {
     fetchNews()
@@ -70,14 +50,31 @@ Les catégories possibles: Géopolitique, Réglementation, Résultats, Macro, M&
   return (
     <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase" }}>
-          IA · Actualités secteur
-        </span>
+        <div>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase" }}>
+            IA · Actualités secteur
+          </span>
+          {lastUpdate && (
+            <div style={{ fontSize: 9, color: "#334155", marginTop: 2 }}>
+              Mis à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          )}
+        </div>
         <button
           onClick={fetchNews}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, padding: "4px 12px", color: "#94A3B8", fontSize: 11, cursor: "pointer", fontFamily: "'DM Mono', monospace" }}
+          disabled={loading}
+          style={{ 
+            background: "rgba(255,255,255,0.05)", 
+            border: "1px solid rgba(255,255,255,0.1)", 
+            borderRadius: 6, 
+            padding: "4px 12px", 
+            color: loading ? "#475569" : "#94A3B8", 
+            fontSize: 11, 
+            cursor: loading ? "wait" : "pointer", 
+            fontFamily: "'DM Mono', monospace" 
+          }}
         >
-          ↻ Actualiser
+          {loading ? "..." : "↻ Actualiser"}
         </button>
       </div>
       {loading ? (
@@ -94,6 +91,11 @@ Les catégories possibles: Géopolitique, Réglementation, Résultats, Macro, M&
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#F1F5F9", marginBottom: 4, lineHeight: 1.4 }}>{item.title}</div>
                   <div style={{ fontSize: 12, color: "#94A3B8", lineHeight: 1.5 }}>{item.summary}</div>
+                  {item.date && (
+                    <div style={{ fontSize: 10, color: "#475569", marginTop: 4, fontFamily: "'DM Mono', monospace" }}>
+                      📅 {item.date}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
                   <span style={{ fontSize: 10, color: impactColor[item.impact], background: `${impactColor[item.impact]}22`, padding: "2px 8px", borderRadius: 99, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>

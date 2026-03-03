@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { SECTORS } from './data/sectors'
 import { calcPortfolioValue, calcCost, calcPnl, pct, fmt } from './utils/portfolio'
+import { useStockPrices } from './hooks/useStockPrices'
+import { useAIProvider } from './hooks/useAIProvider'
 import AINewsPanel from './components/AINewsPanel'
 import AIAnalysis from './components/AIAnalysis'
 import Sparkline from './components/Sparkline'
@@ -9,28 +11,45 @@ export default function App() {
   const [activeSector, setActiveSector] = useState(SECTORS[0])
   const [alertMsg, setAlertMsg] = useState<string | null>(null)
 
-  const totalPortfolio = SECTORS.reduce((s, sec) => s + calcPortfolioValue(sec.stocks), 0)
-  const totalCost = SECTORS.reduce((s, sec) => s + calcCost(sec.stocks), 0)
+  // Détecte le provider IA disponible
+  const { ollamaAvailable, ollamaModels, provider } = useAIProvider()
+
+  // Récupère tous les symboles du portfolio
+  const allSymbols = useMemo(() => {
+    return SECTORS.flatMap(sec => sec.stocks.map(st => st.ticker))
+  }, [])
+
+  // Hook pour récupérer les prix en temps réel (rafraîchit toutes les 60 secondes)
+  const { prices: liveQuotes, loading: pricesLoading, refetch } = useStockPrices(allSymbols, 60000)
+
+  // Fonction pour obtenir le prix actuel (live ou fallback sur prix initial)
+  const getPrice = (st: { ticker: string; price: number }) => {
+    const quote = liveQuotes.get(st.ticker)
+    return quote ? quote.price : st.price
+  }
+
+  // Fonction pour obtenir le changement du jour
+  const getChange = (st: { ticker: string; change: number }) => {
+    const quote = liveQuotes.get(st.ticker)
+    return quote ? quote.changePercent : st.change
+  }
+
+  // Calcul du portfolio avec les prix live
+  const sectorsWithLivePrices = useMemo(() => {
+    return SECTORS.map(sec => ({
+      ...sec,
+      stocks: sec.stocks.map(st => ({
+        ...st,
+        price: getPrice(st),
+        change: getChange(st)
+      }))
+    }))
+  }, [liveQuotes])
+
+  const totalPortfolio = sectorsWithLivePrices.reduce((s, sec) => s + calcPortfolioValue(sec.stocks), 0)
+  const totalCost = sectorsWithLivePrices.reduce((s, sec) => s + calcCost(sec.stocks), 0)
   const totalPnl = totalPortfolio - totalCost
   const totalPct = parseFloat(pct(totalPortfolio, totalCost))
-
-  // Simulated live price flicker
-  const [prices, setPrices] = useState<Record<string, number>>({})
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const updated: Record<string, number> = {}
-      SECTORS.forEach((sec) => {
-        sec.stocks.forEach((st) => {
-          const drift = (Math.random() - 0.5) * 0.1
-          updated[st.ticker] = (prices[st.ticker] || st.price) + drift
-        })
-      })
-      setPrices((p) => ({ ...p, ...updated }))
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [prices])
-
-  const getPrice = (st: { ticker: string; price: number }) => prices[st.ticker] || st.price
 
   return (
     <div style={{ minHeight: "100vh", background: "#060B14", color: "#E2E8F0", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
@@ -42,6 +61,7 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
         @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         .sector-btn:hover { background: rgba(255,255,255,0.06) !important; }
         .stock-row:hover { background: rgba(255,255,255,0.04) !important; }
         .alert-btn:hover { opacity: 0.85; }
@@ -57,8 +77,25 @@ export default function App() {
           </div>
         </div>
         <div style={{ padding: "16px 12px", flex: 1, overflowY: "auto" }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#334155", marginBottom: 12, paddingLeft: 8, textTransform: "uppercase" }}>Secteurs</div>
-          {SECTORS.map((sec) => {
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingLeft: 8 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#334155", textTransform: "uppercase" }}>Secteurs</div>
+            <button 
+              onClick={refetch}
+              disabled={pricesLoading}
+              style={{ 
+                background: "transparent", 
+                border: "none", 
+                color: pricesLoading ? "#1E293B" : "#475569", 
+                cursor: pricesLoading ? "wait" : "pointer", 
+                fontSize: 12,
+                animation: pricesLoading ? "spin 1s linear infinite" : "none"
+              }}
+              title="Rafraîchir les cours"
+            >
+              ↻
+            </button>
+          </div>
+          {sectorsWithLivePrices.map((sec) => {
             const val = calcPortfolioValue(sec.stocks)
             const p = parseFloat(pct(val, calcCost(sec.stocks)))
             const active = activeSector.id === sec.id
@@ -85,10 +122,26 @@ export default function App() {
           })}
         </div>
         <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 2, color: "#1E293B", textTransform: "uppercase" }}>Live · {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 2, color: "#1E293B", textTransform: "uppercase" }}>
+            {pricesLoading ? "Mise à jour..." : `Live · ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`}
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 6px #10B981" }} />
-            <span style={{ fontSize: 11, color: "#334155" }}>Marchés ouverts</span>
+            <div style={{ 
+              width: 6, 
+              height: 6, 
+              borderRadius: "50%", 
+              background: pricesLoading ? "#F59E0B" : "#10B981", 
+              boxShadow: pricesLoading ? "0 0 6px #F59E0B" : "0 0 6px #10B981" 
+            }} />
+            <span style={{ fontSize: 11, color: "#334155" }}>
+              {pricesLoading ? "Chargement..." : `${liveQuotes.size}/${allSymbols.length} cours`}
+            </span>
+          </div>
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div style={{ fontSize: 9, color: "#1E293B", marginBottom: 4 }}>IA: {ollamaAvailable ? '🟢 Ollama' : '🔵 Claude'}</div>
+            {ollamaAvailable && ollamaModels.length > 0 && (
+              <div style={{ fontSize: 8, color: "#1E293B" }}>{ollamaModels[0]}</div>
+            )}
           </div>
         </div>
       </div>
@@ -209,7 +262,7 @@ export default function App() {
             {/* Sector Allocation */}
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
               <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase", marginBottom: 16 }}>Allocation Portefeuille</div>
-              {SECTORS.map((sec) => {
+              {sectorsWithLivePrices.map((sec) => {
                 const val = calcPortfolioValue(sec.stocks)
                 const share = ((val / totalPortfolio) * 100).toFixed(1)
                 const active = sec.id === activeSector.id
