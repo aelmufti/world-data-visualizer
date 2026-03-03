@@ -4,6 +4,7 @@ import { useAIProvider } from './hooks/useAIProvider'
 import { useMarketData } from './hooks/useMarketData'
 import AINewsPanel from './components/AINewsPanel'
 import VesselMap from './components/VesselMap'
+import Navbar from './components/Navbar'
 import { useAIS } from './contexts/AISContext'
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
   const { vesselCount, connected: aisConnected } = useAIS()
 
   return (
-    <div style={{ minHeight: "100vh", background: "#060B14", color: "#E2E8F0", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
+    <div style={{ minHeight: "100vh", background: "#060B14", color: "#E2E8F0", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,8 +37,13 @@ export default function App() {
         .alert-btn:hover { opacity: 0.85; }
       `}</style>
 
+      {/* Navbar */}
+      <Navbar activeSection="sectorial" />
+
+      {/* Main Content Container */}
+      <div style={{ display: "flex", flex: 1 }}>
       {/* Sidebar */}
-      <div style={{ width: 220, background: "#080E1A", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px 0", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", flexShrink: 0 }}>
+      <div style={{ width: 220, background: "#080E1A", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px 0", display: "flex", flexDirection: "column", height: "calc(100vh - 64px)", flexShrink: 0 }}>
         <div style={{ padding: "0 20px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 3, color: "#475569", marginBottom: 6, textTransform: "uppercase" }}>Analyse</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9" }}>Sectorielle</div>
@@ -193,6 +199,7 @@ export default function App() {
 
       {/* Vessel Map Modal */}
       {showMap && <VesselMap onClose={() => setShowMap(false)} />}
+      </div>
     </div>
   )
 }

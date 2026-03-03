@@ -36,6 +36,7 @@ export function AISProvider({ children }: AISProviderProps) {
   const [vessels, setVessels] = useState<Vessel[]>([])
   const [connected, setConnected] = useState(false)
   const [useDemoData, setUseDemoData] = useState(false)
+  const [shipTypes, setShipTypes] = useState<Map<number, number>>(new Map()) // MMSI -> ShipType
 
   useEffect(() => {
     console.log('🌐 Initializing AIS WebSocket connection...')
@@ -80,6 +81,30 @@ export function AISProvider({ children }: AISProviderProps) {
             return
           }
           
+          // Gérer les messages ShipStaticData pour obtenir le type de navire
+          if (data.MessageType === "ShipStaticData") {
+            const staticData = data.Message.ShipStaticData
+            const metadata = data.MetaData
+            
+            if (staticData.Type !== undefined) {
+              setShipTypes(prev => {
+                const updated = new Map(prev)
+                updated.set(metadata.MMSI, staticData.Type)
+                return updated
+              })
+              
+              if (receivedDataCount === 1) {
+                console.log('🎯 First ShipStaticData received:', {
+                  mmsi: metadata.MMSI,
+                  name: staticData.Name,
+                  type: staticData.Type,
+                  typeName: getShipTypeName(staticData.Type)
+                })
+              }
+            }
+            return
+          }
+          
           if (data.MessageType === "PositionReport") {
             receivedDataCount++
             
@@ -91,7 +116,7 @@ export function AISProvider({ children }: AISProviderProps) {
             const msg = data.Message.PositionReport
             const metadata = data.MetaData
             
-            // Log le premier navire reçu
+            // Log le premier navire reçu avec TOUTES les données
             if (receivedDataCount === 1) {
               console.log('🚢 First vessel received:', {
                 name: metadata.ShipName,
@@ -100,7 +125,16 @@ export function AISProvider({ children }: AISProviderProps) {
                 lon: msg.Longitude,
                 type: metadata.ShipType
               })
+              console.log('📦 Full message data:', JSON.stringify(data, null, 2))
             }
+            
+            // Log tous les 100 navires pour voir combien ont un ShipType
+            if (receivedDataCount % 100 === 0) {
+              console.log(`📊 Received ${receivedDataCount} vessels. ShipType present: ${metadata.ShipType !== undefined}`)
+            }
+            
+            // Utiliser le ShipType du cache si disponible, sinon utiliser celui des métadonnées
+            const shipType = shipTypes.get(metadata.MMSI) || metadata.ShipType
             
             // Accepter TOUS les navires, même sans ShipType
             const vessel: Vessel = {
@@ -111,7 +145,7 @@ export function AISProvider({ children }: AISProviderProps) {
               speed: msg.Sog || 0,
               course: msg.Cog || 0,
               heading: msg.TrueHeading || msg.Cog || 0,
-              shipType: metadata.ShipType ? getShipTypeName(metadata.ShipType) : "Other",
+              shipType: shipType ? getShipTypeName(shipType) : "Other",
               destination: metadata.Destination,
               lastUpdate: Date.now()
             }
@@ -225,9 +259,23 @@ export function AISProvider({ children }: AISProviderProps) {
 }
 
 function getShipTypeName(type: number): string {
-  if (type >= 70 && type <= 79) return "Cargo Ship"
+  // AIS Ship Type codes (based on ITU-R M.1371-5)
   if (type >= 80 && type <= 89) return "Tanker"
+  if (type >= 70 && type <= 79) return "Cargo Ship"
   if (type >= 60 && type <= 69) return "Passenger"
+  if (type >= 40 && type <= 49) return "High Speed Craft"
   if (type >= 30 && type <= 39) return "Fishing"
+  if (type >= 20 && type <= 29) return "Wing In Ground"
+  
+  // Specific types
+  if (type === 50) return "Pilot Vessel"
+  if (type === 51) return "Search and Rescue"
+  if (type === 52) return "Tug"
+  if (type === 53) return "Port Tender"
+  if (type === 54) return "Anti-pollution"
+  if (type === 55) return "Law Enforcement"
+  if (type === 58) return "Medical Transport"
+  if (type === 59) return "Non-combatant Ship"
+  
   return "Other"
 }

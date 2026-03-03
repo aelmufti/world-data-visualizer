@@ -42,11 +42,11 @@ export function setupAISProxy(server: Server) {
       const subscriptionMessage = {
         APIKey: API_KEY,
         BoundingBoxes: [[[-90, -180], [90, 180]]], // Couverture mondiale
-        FilterMessageTypes: ["PositionReport"]
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Ajouter ShipStaticData pour avoir le type
       };
       
       sharedAisWs!.send(JSON.stringify(subscriptionMessage));
-      console.log('📡 Subscription sent to AIS Stream');
+      console.log('📡 Subscription sent to AIS Stream (PositionReport + ShipStaticData)');
       
       // Notifier tous les clients connectés
       clients.forEach(client => {
@@ -67,6 +67,13 @@ export function setupAISProxy(server: Server) {
           messageCount++;
           if (messageCount % 100 === 0) {
             console.log(`📊 Received ${messageCount} position reports (${clients.size} clients)`);
+          }
+        } else if (parsed.MessageType === "ShipStaticData") {
+          console.log(`🎯 ShipStaticData received for MMSI ${parsed.MetaData.MMSI}: Type ${parsed.Message.ShipStaticData.Type}`);
+        } else if (parsed.MessageType === "StaticDataReport") {
+          const reportB = parsed.Message.StaticDataReport.ReportB;
+          if (reportB && reportB.Valid && reportB.ShipType !== undefined) {
+            console.log(`🎯 StaticDataReport received for MMSI ${parsed.MetaData.MMSI}: Type ${reportB.ShipType}`);
           }
         }
       } catch (e) {
