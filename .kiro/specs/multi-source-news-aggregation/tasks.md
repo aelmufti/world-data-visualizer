@@ -123,7 +123,7 @@ Ce plan d'implémentation transforme le système actuel d'agrégation d'actualit
 - [x] 7. Checkpoint - Core components complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 8. Implement NewsAggregator core orchestration
+- [x] 8. Implement NewsAggregator core orchestration
   - [x] 8.1 Create NewsAggregator class with parallel fetch
     - Implement aggregateNews() main method
     - Implement fetchFromAllSources() with Promise.allSettled
@@ -144,111 +144,111 @@ Ce plan d'implémentation transforme le système actuel d'agrégation d'actualit
     - Limit to maximum 20 articles
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
   
-  - [-] 8.4 Write property test for parallel fetch execution
+  - [x] 8.4 Write property test for parallel fetch execution
     - **Property 1: Parallel Fetch Execution**
     - **Validates: Requirements 1.1**
   
-  - [~] 8.5 Write property test for resilience to failures
+  - [x] 8.5 Write property test for resilience to failures
     - **Property 2: Resilience to Source Failures**
     - **Validates: Requirements 1.3, 6.1, 6.2**
   
-  - [~] 8.6 Write property test for aggregation timeout
+  - [x] 8.6 Write property test for aggregation timeout
     - **Property 3: Aggregation Timeout Compliance**
     - **Validates: Requirements 1.4**
   
-  - [~] 8.7 Write property test for result sorting
+  - [x] 8.7 Write property test for result sorting
     - **Property 13: Result Sorting by Relevance**
     - **Validates: Requirements 5.1**
   
-  - [~] 8.8 Write property test for relevance filtering
+  - [x] 8.8 Write property test for relevance filtering
     - **Property 14: Relevance Score Filtering**
     - **Validates: Requirements 5.2**
   
-  - [~] 8.9 Write property test for maximum articles limit
+  - [x] 8.9 Write property test for maximum articles limit
     - **Property 15: Maximum Articles Limit**
     - **Validates: Requirements 5.3**
 
-- [ ] 9. Implement response formatting and metadata
-  - [~] 9.1 Implement formatArticle() with French date formatting
+- [x] 9. Implement response formatting and metadata
+  - [x] 9.1 Implement formatArticle() with French date formatting
     - Format dates: "Il y a Xh", "Il y a X jours", "Hier", "DD/MM"
     - Round relevance scores to 2 decimals
     - _Requirements: 10.4_
   
-  - [~] 9.2 Build AggregationResult with complete metadata
+  - [x] 9.2 Build AggregationResult with complete metadata
     - Include timestamp, totalArticles, sourcesUsed, cacheStatus
     - Include aggregationTime on cache miss
     - Include error field when applicable
     - _Requirements: 5.5, 10.2, 10.3, 10.5_
   
-  - [~] 9.3 Write property test for response structure
+  - [x] 9.3 Write property test for response structure
     - **Property 16: Response Structure Completeness**
     - **Validates: Requirements 5.5, 10.2, 10.3**
   
-  - [~] 9.4 Write property test for cache status in response
+  - [x] 9.4 Write property test for cache status in response
     - **Property 22: Cache Status in Response**
     - **Validates: Requirements 8.5**
   
-  - [~] 9.5 Write property test for French date formatting
+  - [x] 9.5 Write property test for French date formatting
     - **Property 25: French Date Formatting**
     - **Validates: Requirements 10.4**
   
-  - [~] 9.6 Write property test for error response structure
+  - [x] 9.6 Write property test for error response structure
     - **Property 26: Error Response Structure**
     - **Validates: Requirements 10.5**
 
-- [ ] 10. Implement logging and metrics
-  - [~] 10.1 Create MetricsLogger class
+- [x] 10. Implement logging and metrics
+  - [x] 10.1 Create MetricsLogger class
     - Implement logAggregation() with all required metrics
     - Implement logSourceFailure() with error details
     - Implement logCacheHit() and logCacheMiss()
     - Log: articles per source, aggregation time, deduplication count, average score
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
   
-  - [~] 10.2 Write property test for metrics logging
+  - [x] 10.2 Write property test for metrics logging
     - **Property 23: Metrics Logging Completeness**
     - **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5**
 
-- [ ] 11. Implement configuration management
-  - [~] 11.1 Create ConfigLoader to read from environment variables
+- [x] 11. Implement configuration management
+  - [x] 11.1 Create ConfigLoader to read from environment variables
     - Load all source configurations (enabled, apiKey, timeout, maxArticles)
     - Load cache, scoring, deduplication, filtering configs
     - Provide default values for all settings
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
   
-  - [~] 11.2 Implement source configuration validation
+  - [x] 11.2 Implement source configuration validation
     - Validate API keys for sources requiring them
     - Log active sources at startup
     - Skip disabled sources during aggregation
     - _Requirements: 7.2, 7.4, 7.5_
   
-  - [~] 11.3 Write property test for disabled source exclusion
+  - [x] 11.3 Write property test for disabled source exclusion
     - **Property 18: Disabled Source Exclusion**
     - **Validates: Requirements 7.4**
   
-  - [~] 11.4 Write property test for API key validation
+  - [x] 11.4 Write property test for API key validation
     - **Property 19: API Key Validation**
     - **Validates: Requirements 7.2**
 
-- [~] 12. Checkpoint - NewsAggregator complete
+- [x] 12. Checkpoint - NewsAggregator complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 13. Integrate with Express router
-  - [~] 13.1 Create new endpoint GET /api/news/:sector
+- [x] 13. Integrate with Express router
+  - [x] 13.1 Create new endpoint GET /api/news/:sector
     - Instantiate NewsAggregator with loaded configuration
     - Call aggregateNews(sector) and return JSON response
     - Handle errors with 500 status and error response
     - _Requirements: 10.1, 10.2, 10.3_
   
-  - [~] 13.2 Add sector parameter validation
+  - [x] 13.2 Add sector parameter validation
     - Whitelist valid sectors (Énergie, Technologie, Santé, Télécoms, Industrie, Services Publics)
     - Return 400 error for invalid sectors
     - _Requirements: 5.1_
   
-  - [~] 13.3 Write property test for JSON response format
+  - [x] 13.3 Write property test for JSON response format
     - **Property 24: JSON Response Format**
     - **Validates: Requirements 10.1**
   
-  - [~] 13.4 Write integration tests for Express endpoint
+  - [x] 13.4 Write integration tests for Express endpoint
     - Test successful aggregation flow
     - Test cache hit scenario
     - Test partial source failure
@@ -256,17 +256,17 @@ Ce plan d'implémentation transforme le système actuel d'agrégation d'actualit
     - Test invalid sector parameter
     - _Requirements: 1.1, 6.1, 6.3, 8.3_
 
-- [ ] 14. Add remaining property tests
-  - [~] 14.1 Write property test for minimum articles per source
+- [x] 14. Add remaining property tests
+  - [x] 14.1 Write property test for minimum articles per source
     - **Property 4: Minimum Articles Per Source**
     - **Validates: Requirements 1.5**
   
-  - [~] 14.2 Write property test for source availability metadata
+  - [x] 14.2 Write property test for source availability metadata
     - **Property 17: Source Availability in Metadata**
     - **Validates: Requirements 6.4**
 
-- [ ] 15. Update environment configuration
-  - [~] 15.1 Add new environment variables to .env.example
+- [x] 15. Update environment configuration
+  - [x] 15.1 Add new environment variables to .env.example
     - Add NEWSAPI_ENABLED, NEWSAPI_TIMEOUT, NEWSAPI_MAX_ARTICLES
     - Add BING_ENABLED, BING_TIMEOUT, BING_MAX_ARTICLES
     - Add GOOGLE_ENABLED, GOOGLE_TIMEOUT, GOOGLE_MAX_ARTICLES
@@ -274,13 +274,13 @@ Ce plan d'implémentation transforme le système actuel d'agrégation d'actualit
     - Add scoring, deduplication, filtering configuration variables
     - _Requirements: 7.1, 7.3_
   
-  - [~] 15.2 Document configuration options in README
+  - [x] 15.2 Document configuration options in README
     - Document all environment variables with descriptions
     - Provide example values and defaults
     - Explain configuration impact on behavior
     - _Requirements: 7.1, 7.3_
 
-- [~] 16. Final checkpoint and integration validation
+- [x] 16. Final checkpoint and integration validation
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

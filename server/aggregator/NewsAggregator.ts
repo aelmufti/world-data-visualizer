@@ -315,7 +315,10 @@ export class NewsAggregator {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-    if (diffMins < 60) {
+    // Handle future dates or very recent dates (< 1 minute)
+    if (diffMins < 1) {
+      return `Il y a 0 min`
+    } else if (diffMins < 60) {
       return `Il y a ${diffMins} min`
     } else if (diffHours < 24) {
       return `Il y a ${diffHours}h`
