@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { newsAggregator, SECTORS } from './aggregator.js';
+import { newsAggregator, SECTORS } from './aggregator-duckdb.js';
 
 const router = Router();
 

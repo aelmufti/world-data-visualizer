@@ -1,0 +1,801 @@
+[
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "AMZN",
+    "name": "Amazon.com Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Consumer Cyclical",
+    "country": "US"
+  },
+  {
+    "symbol": "TSLA",
+    "name": "Tesla Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Automotive",
+    "country": "US"
+  },
+  {
+    "symbol": "META",
+    "name": "Meta Platforms Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "JPM",
+    "name": "JPMorgan Chase & Co.",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "US"
+  },
+  {
+    "symbol": "V",
+    "name": "Visa Inc.",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "US"
+  },
+  {
+    "symbol": "JNJ",
+    "name": "Johnson & Johnson",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Healthcare",
+    "country": "US"
+  },
+  {
+    "symbol": "WMT",
+    "name": "Walmart Inc.",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Consumer Defensive",
+    "country": "US"
+  },
+  {
+    "symbol": "PG",
+    "name": "Procter & Gamble Co.",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Consumer Defensive",
+    "country": "US"
+  },
+  {
+    "symbol": "MA",
+    "name": "Mastercard Inc.",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "US"
+  },
+  {
+    "symbol": "DIS",
+    "name": "The Walt Disney Company",
+    "exchange": "NYSE",
+    "type": "stock",
+    "sector": "Communication Services",
+    "country": "US"
+  },
+  {
+    "symbol": "NFLX",
+    "name": "Netflix Inc.",
+    "exchange": "NASDAQ",
+    "type": "stock",
+    "sector": "Communication Services",
+    "country": "US"
+  },
+  {
+    "symbol": "^GSPC",
+    "name": "S&P 500",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "US"
+  },
+  {
+    "symbol": "^IXIC",
+    "name": "NASDAQ Composite",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "US"
+  },
+  {
+    "symbol": "^DJI",
+    "name": "Dow Jones Industrial Average",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "US"
+  },
+  {
+    "symbol": "^RUT",
+    "name": "Russell 2000",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "US"
+  },
+  {
+    "symbol": "^VIX",
+    "name": "CBOE Volatility Index",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "US"
+  },
+  {
+    "symbol": "SPY",
+    "name": "SPDR S&P 500 ETF Trust",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Diversified",
+    "country": "US"
+  },
+  {
+    "symbol": "QQQ",
+    "name": "Invesco QQQ Trust",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "VTI",
+    "name": "Vanguard Total Stock Market ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Diversified",
+    "country": "US"
+  },
+  {
+    "symbol": "MC.PA",
+    "name": "LVMH Moët Hennessy Louis Vuitton",
+    "exchange": "Euronext Paris",
+    "type": "stock",
+    "sector": "Consumer Cyclical",
+    "country": "FR"
+  },
+  {
+    "symbol": "OR.PA",
+    "name": "L'Oréal S.A.",
+    "exchange": "Euronext Paris",
+    "type": "stock",
+    "sector": "Consumer Defensive",
+    "country": "FR"
+  },
+  {
+    "symbol": "SAN.PA",
+    "name": "Sanofi S.A.",
+    "exchange": "Euronext Paris",
+    "type": "stock",
+    "sector": "Healthcare",
+    "country": "FR"
+  },
+  {
+    "symbol": "TTE.PA",
+    "name": "TotalEnergies SE",
+    "exchange": "Euronext Paris",
+    "type": "stock",
+    "sector": "Energy",
+    "country": "FR"
+  },
+  {
+    "symbol": "AIR.PA",
+    "name": "Airbus SE",
+    "exchange": "Euronext Paris",
+    "type": "stock",
+    "sector": "Industrials",
+    "country": "FR"
+  },
+  {
+    "symbol": "SAP.DE",
+    "name": "SAP SE",
+    "exchange": "XETRA",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "DE"
+  },
+  {
+    "symbol": "SIE.DE",
+    "name": "Siemens AG",
+    "exchange": "XETRA",
+    "type": "stock",
+    "sector": "Industrials",
+    "country": "DE"
+  },
+  {
+    "symbol": "VOW3.DE",
+    "name": "Volkswagen AG",
+    "exchange": "XETRA",
+    "type": "stock",
+    "sector": "Automotive",
+    "country": "DE"
+  },
+  {
+    "symbol": "BAS.DE",
+    "name": "BASF SE",
+    "exchange": "XETRA",
+    "type": "stock",
+    "sector": "Basic Materials",
+    "country": "DE"
+  },
+  {
+    "symbol": "ALV.DE",
+    "name": "Allianz SE",
+    "exchange": "XETRA",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "DE"
+  },
+  {
+    "symbol": "SHEL.L",
+    "name": "Shell plc",
+    "exchange": "LSE",
+    "type": "stock",
+    "sector": "Energy",
+    "country": "GB"
+  },
+  {
+    "symbol": "AZN.L",
+    "name": "AstraZeneca PLC",
+    "exchange": "LSE",
+    "type": "stock",
+    "sector": "Healthcare",
+    "country": "GB"
+  },
+  {
+    "symbol": "HSBA.L",
+    "name": "HSBC Holdings plc",
+    "exchange": "LSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "GB"
+  },
+  {
+    "symbol": "BP.L",
+    "name": "BP p.l.c.",
+    "exchange": "LSE",
+    "type": "stock",
+    "sector": "Energy",
+    "country": "GB"
+  },
+  {
+    "symbol": "ULVR.L",
+    "name": "Unilever PLC",
+    "exchange": "LSE",
+    "type": "stock",
+    "sector": "Consumer Defensive",
+    "country": "GB"
+  },
+  {
+    "symbol": "^FCHI",
+    "name": "CAC 40",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "FR"
+  },
+  {
+    "symbol": "^GDAXI",
+    "name": "DAX",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "DE"
+  },
+  {
+    "symbol": "^FTSE",
+    "name": "FTSE 100",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "GB"
+  },
+  {
+    "symbol": "7203.T",
+    "name": "Toyota Motor Corporation",
+    "exchange": "TSE",
+    "type": "stock",
+    "sector": "Automotive",
+    "country": "JP"
+  },
+  {
+    "symbol": "6758.T",
+    "name": "Sony Group Corporation",
+    "exchange": "TSE",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "JP"
+  },
+  {
+    "symbol": "9984.T",
+    "name": "SoftBank Group Corp.",
+    "exchange": "TSE",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "JP"
+  },
+  {
+    "symbol": "6861.T",
+    "name": "Keyence Corporation",
+    "exchange": "TSE",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "JP"
+  },
+  {
+    "symbol": "8306.T",
+    "name": "Mitsubishi UFJ Financial Group",
+    "exchange": "TSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "JP"
+  },
+  {
+    "symbol": "0700.HK",
+    "name": "Tencent Holdings Limited",
+    "exchange": "HKEX",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "HK"
+  },
+  {
+    "symbol": "9988.HK",
+    "name": "Alibaba Group Holding Limited",
+    "exchange": "HKEX",
+    "type": "stock",
+    "sector": "Technology",
+    "country": "HK"
+  },
+  {
+    "symbol": "0941.HK",
+    "name": "China Mobile Limited",
+    "exchange": "HKEX",
+    "type": "stock",
+    "sector": "Communication Services",
+    "country": "HK"
+  },
+  {
+    "symbol": "1299.HK",
+    "name": "AIA Group Limited",
+    "exchange": "HKEX",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "HK"
+  },
+  {
+    "symbol": "0005.HK",
+    "name": "HSBC Holdings plc",
+    "exchange": "HKEX",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "HK"
+  },
+  {
+    "symbol": "600519.SS",
+    "name": "Kweichow Moutai Co., Ltd.",
+    "exchange": "SSE",
+    "type": "stock",
+    "sector": "Consumer Defensive",
+    "country": "CN"
+  },
+  {
+    "symbol": "601318.SS",
+    "name": "Ping An Insurance",
+    "exchange": "SSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "CN"
+  },
+  {
+    "symbol": "600036.SS",
+    "name": "China Merchants Bank",
+    "exchange": "SSE",
+    "type": "stock",
+    "sector": "Financial Services",
+    "country": "CN"
+  },
+  {
+    "symbol": "^N225",
+    "name": "Nikkei 225",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "JP"
+  },
+  {
+    "symbol": "000001.SS",
+    "name": "Shanghai Composite",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "CN"
+  },
+  {
+    "symbol": "^HSI",
+    "name": "Hang Seng Index",
+    "exchange": "INDEX",
+    "type": "index",
+    "country": "HK"
+  }
+]
+,
+  {
+    "symbol": "IVV",
+    "name": "iShares Core S&P 500 ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Diversified",
+    "country": "US"
+  },
+  {
+    "symbol": "VOO",
+    "name": "Vanguard S&P 500 ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Diversified",
+    "country": "US"
+  },
+  {
+    "symbol": "VEA",
+    "name": "Vanguard FTSE Developed Markets ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "International",
+    "country": "US"
+  },
+  {
+    "symbol": "IEFA",
+    "name": "iShares Core MSCI EAFE ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "International",
+    "country": "US"
+  },
+  {
+    "symbol": "VWO",
+    "name": "Vanguard FTSE Emerging Markets ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Emerging Markets",
+    "country": "US"
+  },
+  {
+    "symbol": "AGG",
+    "name": "iShares Core U.S. Aggregate Bond ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Fixed Income",
+    "country": "US"
+  },
+  {
+    "symbol": "BND",
+    "name": "Vanguard Total Bond Market ETF",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Fixed Income",
+    "country": "US"
+  },
+  {
+    "symbol": "TLT",
+    "name": "iShares 20+ Year Treasury Bond ETF",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Government Bonds",
+    "country": "US"
+  },
+  {
+    "symbol": "LQD",
+    "name": "iShares iBoxx $ Investment Grade Corporate Bond ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Corporate Bonds",
+    "country": "US"
+  },
+  {
+    "symbol": "HYG",
+    "name": "iShares iBoxx $ High Yield Corporate Bond ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "High Yield Bonds",
+    "country": "US"
+  },
+  {
+    "symbol": "MUB",
+    "name": "iShares National Muni Bond ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Municipal Bonds",
+    "country": "US"
+  },
+  {
+    "symbol": "GLD",
+    "name": "SPDR Gold Shares",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Commodities",
+    "country": "US"
+  },
+  {
+    "symbol": "SLV",
+    "name": "iShares Silver Trust",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Commodities",
+    "country": "US"
+  },
+  {
+    "symbol": "USO",
+    "name": "United States Oil Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Commodities",
+    "country": "US"
+  },
+  {
+    "symbol": "DBC",
+    "name": "Invesco DB Commodity Index Tracking Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Commodities",
+    "country": "US"
+  },
+  {
+    "symbol": "VNQ",
+    "name": "Vanguard Real Estate ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Real Estate",
+    "country": "US"
+  },
+  {
+    "symbol": "IYR",
+    "name": "iShares U.S. Real Estate ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Real Estate",
+    "country": "US"
+  },
+  {
+    "symbol": "XLK",
+    "name": "Technology Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "XLF",
+    "name": "Financial Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Financial",
+    "country": "US"
+  },
+  {
+    "symbol": "XLE",
+    "name": "Energy Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Energy",
+    "country": "US"
+  },
+  {
+    "symbol": "XLV",
+    "name": "Health Care Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Healthcare",
+    "country": "US"
+  },
+  {
+    "symbol": "XLI",
+    "name": "Industrial Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Industrials",
+    "country": "US"
+  },
+  {
+    "symbol": "XLP",
+    "name": "Consumer Staples Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Consumer Staples",
+    "country": "US"
+  },
+  {
+    "symbol": "XLY",
+    "name": "Consumer Discretionary Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Consumer Discretionary",
+    "country": "US"
+  },
+  {
+    "symbol": "XLU",
+    "name": "Utilities Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Utilities",
+    "country": "US"
+  },
+  {
+    "symbol": "XLB",
+    "name": "Materials Select Sector SPDR Fund",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Materials",
+    "country": "US"
+  },
+  {
+    "symbol": "ARKK",
+    "name": "ARK Innovation ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Innovation",
+    "country": "US"
+  },
+  {
+    "symbol": "ARKG",
+    "name": "ARK Genomic Revolution ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Healthcare",
+    "country": "US"
+  },
+  {
+    "symbol": "ARKW",
+    "name": "ARK Next Generation Internet ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Technology",
+    "country": "US"
+  },
+  {
+    "symbol": "ICLN",
+    "name": "iShares Global Clean Energy ETF",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Clean Energy",
+    "country": "US"
+  },
+  {
+    "symbol": "TAN",
+    "name": "Invesco Solar ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Solar Energy",
+    "country": "US"
+  },
+  {
+    "symbol": "SOXX",
+    "name": "iShares Semiconductor ETF",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Semiconductors",
+    "country": "US"
+  },
+  {
+    "symbol": "SMH",
+    "name": "VanEck Semiconductor ETF",
+    "exchange": "NASDAQ",
+    "type": "etf",
+    "sector": "Semiconductors",
+    "country": "US"
+  },
+  {
+    "symbol": "KWEB",
+    "name": "KraneShares CSI China Internet ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "China Tech",
+    "country": "US"
+  },
+  {
+    "symbol": "EWJ",
+    "name": "iShares MSCI Japan ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Japan",
+    "country": "US"
+  },
+  {
+    "symbol": "EWG",
+    "name": "iShares MSCI Germany ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Germany",
+    "country": "US"
+  },
+  {
+    "symbol": "EWU",
+    "name": "iShares MSCI United Kingdom ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "UK",
+    "country": "US"
+  },
+  {
+    "symbol": "EWZ",
+    "name": "iShares MSCI Brazil ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Brazil",
+    "country": "US"
+  },
+  {
+    "symbol": "EWY",
+    "name": "iShares MSCI South Korea ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "South Korea",
+    "country": "US"
+  },
+  {
+    "symbol": "INDA",
+    "name": "iShares MSCI India ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "India",
+    "country": "US"
+  },
+  {
+    "symbol": "MCHI",
+    "name": "iShares MSCI China ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "China",
+    "country": "US"
+  },
+  {
+    "symbol": "BITO",
+    "name": "ProShares Bitcoin Strategy ETF",
+    "exchange": "NYSE",
+    "type": "etf",
+    "sector": "Cryptocurrency",
+    "country": "US"
+  },
+  {
+    "symbol": "GBTC",
+    "name": "Grayscale Bitcoin Trust",
+    "exchange": "OTC",
+    "type": "trust",
+    "sector": "Cryptocurrency",
+    "country": "US"
+  },
+  {
+    "symbol": "ETHE",
+    "name": "Grayscale Ethereum Trust",
+    "exchange": "OTC",
+    "type": "trust",
+    "sector": "Cryptocurrency",
+    "country": "US"
+  }
+]

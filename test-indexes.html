@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Market Indexes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            color: #e2e8f0;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #60a5fa;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+        .status.loading {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+        }
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .indexes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .index-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .index-name {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .index-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+        .index-change {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .change-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .change-badge.positive {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .change-badge.negative {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .timestamp {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Test des Indices Boursiers en Temps Réel</h1>
+        <div id="status" class="status loading">Chargement des indices...</div>
+        <div id="indexes" class="indexes-grid"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const INDEX_SYMBOLS = [
+            { symbol: '^GSPC', name: 'S&P 500' },
+            { symbol: '^IXIC', name: 'NASDAQ' },
+            { symbol: '^DJI', name: 'DOW Jones' },
+            { symbol: '^RUT', name: 'Russell 2000' },
+            { symbol: '^VIX', name: 'VIX' },
+            { symbol: '^FCHI', name: 'CAC 40' },
+            { symbol: '^GDAXI', name: 'DAX' },
+            { symbol: '^FTSE', name: 'FTSE 100' },
+            { symbol: '^N225', name: 'Nikkei 225' },
+            { symbol: '000001.SS', name: 'Shanghai Composite' }
+        ];
+
+        async function fetchIndexes() {
+            const statusEl = document.getElementById('status');
+            const indexesEl = document.getElementById('indexes');
+
+            try {
+                const symbols = INDEX_SYMBOLS.map(idx => idx.symbol).join(',');
+                const response = await fetch(`${API_BASE_URL}/quotes?symbols=${symbols}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const quotes = await response.json();
+
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ ${quotes.length} indices chargés avec succès depuis Yahoo Finance`;
+
+                indexesEl.innerHTML = INDEX_SYMBOLS.map(({ symbol, name }) => {
+                    const quote = quotes.find(q => q.symbol === symbol);
+                    
+                    if (!quote) {
+                        return `
+                            <div class="index-card">
+                                <div class="index-name">${name}</div>
+                                <div class="index-value">N/A</div>
+                            </div>
+                        `;
+                    }
+
+                    const isPositive = quote.change > 0;
+                    const isNegative = quote.change < 0;
+                    const changeClass = isPositive ? 'positive' : isNegative ? 'negative' : '';
+                    const arrow = isPositive ? '▲' : isNegative ? '▼' : '●';
+
+                    return `
+                        <div class="index-card">
+                            <div class="index-name">${name}</div>
+                            <div class="index-value">${quote.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            <div class="index-change">
+                                <span class="change-badge ${changeClass}">
+                                    <span>${arrow}</span>
+                                    <span>${isPositive ? '+' : ''}${quote.change.toFixed(2)}</span>
+                                </span>
+                                <span style="font-size: 13px; font-weight: 600; color: ${isPositive ? '#10b981' : isNegative ? '#ef4444' : '#64748b'}">
+                                    ${isPositive ? '+' : ''}${quote.changePercent.toFixed(2)}%
+                                </span>
+                            </div>
+                            <div class="timestamp">
+                                ${new Date(quote.timestamp).toLocaleString('fr-FR')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Erreur: ${error.message}. Vérifiez que le backend est démarré sur le port 8000.`;
+                console.error('Error fetching indexes:', error);
+            }
+        }
+
+        // Charger les indices au démarrage
+        fetchIndexes();
+
+        // Rafraîchir toutes les 60 secondes
+        setInterval(fetchIndexes, 60000);
+    </script>
+</body>
+</html>

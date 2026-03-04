@@ -1,4 +1,4 @@
-import { db, collections } from './firebase.js';
+import { getDatabase } from './database.js';
 
 // Secteurs d'analyse
 export const SECTORS = {
@@ -14,7 +14,7 @@ export const SECTORS = {
   TELECOM: 'telecom',
 } as const;
 
-// Mots-clés par secteur pour le scoring (élargis)
+// Mots-clés par secteur pour le scoring
 const SECTOR_KEYWORDS: Record<string, string[]> = {
   technology: [
     'AI', 'artificial intelligence', 'software', 'cloud', 'semiconductor', 'chip',
@@ -140,9 +140,6 @@ export interface ScoredArticle {
 }
 
 export class NewsAggregator {
-  /**
-   * Score la pertinence d'un article pour un secteur donné
-   */
   scoreSectorRelevance(title: string, body: string, sector: string): number {
     const keywords = SECTOR_KEYWORDS[sector] || [];
     
@@ -150,7 +147,6 @@ export class NewsAggregator {
     let leadMatches = 0;
     let bodyMatches = 0;
     
-    // Extraire les 150 premiers mots du body pour le lead
     const words = body.split(/\s+/);
     const lead = words.slice(0, 150).join(' ');
     const rest = words.slice(150).join(' ');
@@ -160,7 +156,6 @@ export class NewsAggregator {
     const restLower = rest.toLowerCase();
     
     for (const keyword of keywords) {
-      // Word-boundary matching pour éviter les faux positifs
       const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
       
       if (regex.test(titleLower)) titleMatches++;
@@ -168,44 +163,27 @@ export class NewsAggregator {
       if (regex.test(restLower)) bodyMatches++;
     }
     
-    // Position weighting: titre x2.0, lead x1.5, body x1.0
     const weightedMatches = (titleMatches * 2.0) + (leadMatches * 1.5) + (bodyMatches * 1.0);
-    
-    // Courbe logarithmique pour éviter le plafonnement
-    // 1 match = ~3.3, 5 matches = ~8.7, 10 matches = ~10
     const score = 10 * (1 - Math.exp(-weightedMatches * 0.4));
     
     return score;
   }
 
-  /**
-   * Calcule le score d'importance basé sur les événements détectés
-   */
   calculateImportanceScore(events: string[]): number {
-    if (events.length === 0) return 3; // Score par défaut
-    
+    if (events.length === 0) return 3;
     const scores = events.map(event => EVENT_IMPORTANCE[event] || 3);
     return Math.max(...scores);
   }
 
-  /**
-   * Génère un résumé court de l'article
-   */
   generateSummary(title: string, body: string): string {
-    // Prendre les 2 premières phrases du body
     const sentences = body.split(/[.!?]+/).filter(s => s.trim().length > 20);
     const summary = sentences.slice(0, 2).join('. ').trim();
     return summary.substring(0, 200) + (summary.length > 200 ? '...' : '');
   }
 
-  /**
-   * Extrait les points clés de l'article
-   */
   extractKeyPoints(text: string): string[] {
     const points: string[] = [];
-    const textLower = text.toLowerCase();
     
-    // Détecter les chiffres importants (revenus, profits, etc.)
     const numberPatterns = [
       /\$[\d,]+\.?\d*\s*(billion|million|trillion)/gi,
       /[\d,]+\.?\d*%/g,
@@ -220,7 +198,6 @@ export class NewsAggregator {
       }
     }
     
-    // Détecter les phrases avec des mots-clés importants
     const importantKeywords = ['announced', 'launched', 'acquired', 'reported', 'increased', 'decreased'];
     const sentences = text.split(/[.!?]+/);
     
@@ -234,78 +211,61 @@ export class NewsAggregator {
     return points.slice(0, 5);
   }
 
-  /**
-   * Agrège et score les articles pour un secteur donné
-   */
   async aggregateForSector(sector: string, limit: number = 20): Promise<ScoredArticle[]> {
-    // Récupérer les articles récents (dernières 24h)
+    const db = getDatabase();
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
-    const articlesSnapshot = await db.collection(collections.articles)
-      .where('publishedAt', '>=', since)
-      .orderBy('publishedAt', 'desc')
-      .limit(200) // Analyser les 200 derniers articles
-      .get();
+    const articles = await db.all(`
+      SELECT * FROM articles 
+      WHERE published_at >= ? 
+      ORDER BY published_at DESC 
+      LIMIT 200
+    `, since.toISOString());
 
     const scoredArticles: ScoredArticle[] = [];
 
-    for (const doc of articlesSnapshot.docs) {
-      const article = doc.data();
+    for (const article of articles) {
+      const relevanceScore = this.scoreSectorRelevance(article.title, article.body || '', sector);
       
-      // Score de pertinence sectorielle (avec position weighting)
-      const relevanceScore = this.scoreSectorRelevance(article.title, article.body, sector);
-      
-      // Filtrer les articles non pertinents (score < 1.0)
       if (relevanceScore < 1.0) continue;
       
-      // Récupérer les mentions et événements
-      const mentionsSnapshot = await db.collection(collections.mentions)
-        .where('articleId', '==', doc.id)
-        .get();
+      const mentions = await db.all(`
+        SELECT * FROM article_mentions WHERE article_id = ?
+      `, article.id);
       
-      const companies = mentionsSnapshot.docs.map(m => m.data().ticker);
-      const eventTags = mentionsSnapshot.docs.flatMap(m => m.data().eventTags || []);
+      const companies = mentions.map(m => m.ticker);
+      const eventTags = mentions.flatMap(m => m.event_tags || []);
       
-      // Score d'importance
       const importanceScore = this.calculateImportanceScore(eventTags);
+      const sentimentScore = ((article.raw_sentiment + 1) / 2) * 10;
       
-      // Score de sentiment (direction préservée: -1 à +1 → 0 à 10)
-      const sentimentScore = ((article.rawSentiment + 1) / 2) * 10;
-      
-      // Score de base (pondéré)
       let baseScore = (relevanceScore * 0.6) + (importanceScore * 0.3) + (sentimentScore * 0.1);
       
-      // Recency decay: articles plus récents = score plus élevé
-      const ageInHours = (Date.now() - article.publishedAt.toDate().getTime()) / 3600000;
-      const decayFactor = Math.exp(-0.15 * ageInHours); // half-life ~4.6h
+      const ageInHours = (Date.now() - new Date(article.published_at).getTime()) / 3600000;
+      const decayFactor = Math.exp(-0.15 * ageInHours);
       const finalScore = baseScore * decayFactor;
       
       scoredArticles.push({
-        id: doc.id,
+        id: article.id,
         title: article.title,
         url: article.url,
-        publishedAt: article.publishedAt.toDate(),
+        publishedAt: new Date(article.published_at),
         sector,
         relevanceScore,
         importanceScore,
         finalScore,
-        sentiment: article.rawSentiment,
-        summary: this.generateSummary(article.title, article.body),
-        keyPoints: this.extractKeyPoints(`${article.title} ${article.body}`),
+        sentiment: article.raw_sentiment,
+        summary: this.generateSummary(article.title, article.body || ''),
+        keyPoints: this.extractKeyPoints(`${article.title} ${article.body || ''}`),
         companies,
         events: eventTags,
       });
     }
 
-    // Trier par score final (décroissant)
     scoredArticles.sort((a, b) => b.finalScore - a.finalScore);
-    
     return scoredArticles.slice(0, limit);
   }
 
-  /**
-   * Agrège les top articles pour tous les secteurs
-   */
   async aggregateAllSectors(topPerSector: number = 10): Promise<Record<string, ScoredArticle[]>> {
     const result: Record<string, ScoredArticle[]> = {};
     
@@ -317,23 +277,14 @@ export class NewsAggregator {
     return result;
   }
 
-  /**
-   * Obtient les articles les plus importants globalement
-   */
   async getTopArticles(limit: number = 50): Promise<ScoredArticle[]> {
     const allSectors = await this.aggregateAllSectors(20);
-    
-    // Combiner tous les articles
     const allArticles = Object.values(allSectors).flat();
-    
-    // Dédupliquer par ID
     const uniqueArticles = Array.from(
       new Map(allArticles.map(a => [a.id, a])).values()
     );
     
-    // Trier par score final
     uniqueArticles.sort((a, b) => b.finalScore - a.finalScore);
-    
     return uniqueArticles.slice(0, limit);
   }
 }

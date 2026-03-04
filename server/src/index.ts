@@ -1,12 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
-import { db, collections } from './firebase.js';
-import { nlpProcessor } from './nlp.js';
+import { initDatabase, getDatabase, collections } from './database.js';
 import NodeCache from 'node-cache';
 import aggregationRouter from './aggregation-endpoint.js';
 import marketDataRouter from './market-data-endpoint.js';
+import historicalDataRouter from './stock-market/historical-data-endpoint.js';
+import searchRouter from './stock-market/search-endpoint.js';
+import marketStatusRouter from './stock-market/market-status-endpoint.js';
+import quoteRouter from './stock-market/quote-endpoint.js';
 import { setupAISProxy } from './ais-proxy.js';
+import { StockWebSocketServer } from './stock-market/websocket-server.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -15,8 +19,33 @@ const cache = new NodeCache({ stdTTL: 60 });
 // Créer un serveur HTTP pour supporter WebSocket
 const server = createServer(app);
 
+// Initialize Stock Market WebSocket Server on port 8001
+let stockWsServer: StockWebSocketServer | null = null;
+
 app.use(cors());
 app.use(express.json());
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    services: {
+      database: db ? 'connected' : 'disconnected',
+      websocket: stockWsServer ? 'running' : 'stopped'
+    }
+  });
+});
+
+// Initialize database
+let db: any;
+initDatabase().then((database) => {
+  db = database;
+  console.log('✅ Database initialized');
+}).catch((error) => {
+  console.error('❌ Database initialization failed:', error);
+  process.exit(1);
+});
 
 // Setup AIS WebSocket proxy
 setupAISProxy(server);
@@ -27,6 +56,18 @@ app.use('/api/aggregated', aggregationRouter);
 // Routes de données de marché
 app.use('/api', marketDataRouter);
 
+// Routes de quotes boursières
+app.use('/api', quoteRouter);
+
+// Routes de données historiques de marché boursier
+app.use('/api', historicalDataRouter);
+
+// Routes de recherche de symboles boursiers
+app.use('/api', searchRouter);
+
+// Routes de statut de marché
+app.use('/api', marketStatusRouter);
+
 // Middleware: API Key verification
 const verifyApiKey = async (req: any, res: any, next: any) => {
   const apiKey = req.headers['x-api-key'];
@@ -34,17 +75,17 @@ const verifyApiKey = async (req: any, res: any, next: any) => {
     return res.status(401).json({ error: 'API key required' });
   }
 
-  const keyDoc = await db.collection(collections.apiKeys)
-    .where('key', '==', apiKey)
-    .where('isActive', '==', true)
-    .limit(1)
-    .get();
+  const keyDoc = await getDatabase().all(`
+    SELECT * FROM ${collections.apiKeys}
+    WHERE key = ? AND is_active = TRUE
+    LIMIT 1
+  `, apiKey);
 
-  if (keyDoc.empty) {
+  if (keyDoc.length === 0) {
     return res.status(401).json({ error: 'Invalid API key' });
   }
 
-  req.apiKey = keyDoc.docs[0].data();
+  req.apiKey = keyDoc[0];
   next();
 };
 
@@ -53,7 +94,7 @@ const rateLimiter = (req: any, res: any, next: any) => {
   const key = `rate:${req.apiKey.key}`;
   const current = cache.get<number>(key) || 0;
 
-  if (current >= req.apiKey.rateLimit) {
+  if (current >= req.apiKey.rate_limit) {
     return res.status(429).json({ error: 'Rate limit exceeded' });
   }
 
@@ -68,67 +109,73 @@ app.get('/', (req, res) => {
 // GET /articles
 app.get('/articles', verifyApiKey, rateLimiter, async (req, res) => {
   try {
-    const { ticker, event_type, sentiment_min, sentiment_max, from_date, to_date, limit = 20, offset = 0, sort_by = 'publishedAt' } = req.query;
+    const { ticker, sentiment_min, sentiment_max, from_date, to_date, limit = 20 } = req.query;
 
-    let query: any = db.collection(collections.articles);
+    let whereClauses: string[] = [];
+    let params: any[] = [];
 
     if (from_date) {
-      query = query.where('publishedAt', '>=', new Date(from_date as string));
+      whereClauses.push('published_at >= ?');
+      params.push(new Date(from_date as string).toISOString());
     }
     if (to_date) {
-      query = query.where('publishedAt', '<=', new Date(to_date as string));
+      whereClauses.push('published_at <= ?');
+      params.push(new Date(to_date as string).toISOString());
     }
     if (sentiment_min) {
-      query = query.where('rawSentiment', '>=', parseFloat(sentiment_min as string));
+      whereClauses.push('raw_sentiment >= ?');
+      params.push(parseFloat(sentiment_min as string));
     }
     if (sentiment_max) {
-      query = query.where('rawSentiment', '<=', parseFloat(sentiment_max as string));
+      whereClauses.push('raw_sentiment <= ?');
+      params.push(parseFloat(sentiment_max as string));
     }
 
-    query = query.orderBy(sort_by as string, 'desc').limit(parseInt(limit as string));
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    
+    const articles = await getDatabase().all(`
+      SELECT * FROM ${collections.articles}
+      ${whereClause}
+      ORDER BY published_at DESC
+      LIMIT ?
+    `, ...params, parseInt(limit as string));
 
-    const snapshot = await query.get();
-    const articles = [];
+    const result = [];
 
-    for (const doc of snapshot.docs) {
-      const article = doc.data();
-      
-      // Get mentions
-      const mentionsSnapshot = await db.collection(collections.mentions)
-        .where('articleId', '==', doc.id)
-        .get();
-
-      const companies = mentionsSnapshot.docs.map(m => m.data());
+    for (const article of articles) {
+      const mentions = await getDatabase().all(`
+        SELECT * FROM ${collections.mentions} WHERE article_id = ?
+      `, article.id);
 
       // Filter by ticker if specified
       if (ticker) {
-        const tickers = (ticker as string).split(',').map(t => t.trim().toUpperCase());
-        if (!companies.some(c => tickers.includes(c.ticker))) {
+        const tickers = (ticker as string).split(',').map((t: string) => t.trim().toUpperCase());
+        if (!mentions.some((m: any) => tickers.includes(m.ticker))) {
           continue;
         }
       }
 
-      const latency = (article.ingestedAt.toDate().getTime() - article.publishedAt.toDate().getTime()) / 1000;
+      const latency = (new Date(article.ingested_at).getTime() - new Date(article.published_at).getTime()) / 1000;
 
-      articles.push({
-        id: doc.id,
+      result.push({
+        id: article.id,
         title: article.title,
         url: article.url,
-        publishedAt: article.publishedAt.toDate().toISOString(),
-        ingestedAt: article.ingestedAt.toDate().toISOString(),
+        publishedAt: article.published_at,
+        ingestedAt: article.ingested_at,
         latencySeconds: latency,
-        source: article.sourceDomain,
-        companies: companies.map(c => ({
+        source: article.source_domain,
+        companies: mentions.map((c: any) => ({
           ticker: c.ticker,
-          mentionCount: c.mentionCount,
-          entitySentiment: c.entitySentiment,
-          isPrimarySubject: c.isPrimarySubject,
-          eventTags: c.eventTags || [],
+          mentionCount: c.mention_count,
+          entitySentiment: c.entity_sentiment,
+          isPrimarySubject: c.is_primary_subject,
+          eventTags: c.event_tags || [],
         })),
       });
     }
 
-    res.json(articles);
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -140,45 +187,40 @@ app.get('/companies/:ticker/summary', verifyApiKey, rateLimiter, async (req, res
     const { ticker } = req.params;
     const hours = parseInt(req.query.hours as string) || 24;
 
-    const companySnapshot = await db.collection(collections.companies)
-      .where('ticker', '==', ticker.toUpperCase())
-      .limit(1)
-      .get();
+    const companies = await getDatabase().all(`
+      SELECT * FROM ${collections.companies} 
+      WHERE ticker = ? 
+      LIMIT 1
+    `, ticker.toUpperCase());
 
-    if (companySnapshot.empty) {
+    if (companies.length === 0) {
       return res.status(404).json({ error: 'Company not found' });
     }
 
-    const company = companySnapshot.docs[0];
+    const company = companies[0];
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
-    // Get mentions
-    const mentionsSnapshot = await db.collection(collections.mentions)
-      .where('companyId', '==', company.id)
-      .get();
+    const mentions = await getDatabase().all(`
+      SELECT * FROM ${collections.mentions} WHERE company_id = ?
+    `, company.id);
 
-    const mentions = mentionsSnapshot.docs.map(d => d.data());
     const articleCount = mentions.length;
     const avgSentiment = mentions.length > 0
-      ? mentions.reduce((sum, m) => sum + m.entitySentiment, 0) / mentions.length
+      ? mentions.reduce((sum: number, m: any) => sum + m.entity_sentiment, 0) / mentions.length
       : 0;
 
-    // Get recent events
-    const eventsSnapshot = await db.collection(collections.events)
-      .where('companyId', '==', company.id)
-      .where('detectedAt', '>=', since)
-      .orderBy('detectedAt', 'desc')
-      .limit(10)
-      .get();
+    const events = await getDatabase().all(`
+      SELECT * FROM ${collections.events}
+      WHERE company_id = ? AND detected_at >= ?
+      ORDER BY detected_at DESC
+      LIMIT 10
+    `, company.id, since.toISOString());
 
-    const recentEvents = eventsSnapshot.docs.map(d => {
-      const e = d.data();
-      return {
-        eventType: e.eventType,
-        confidence: e.confidence,
-        detectedAt: e.detectedAt.toDate().toISOString(),
-      };
-    });
+    const recentEvents = events.map((e: any) => ({
+      eventType: e.event_type,
+      confidence: e.confidence,
+      detectedAt: e.detected_at,
+    }));
 
     res.json({
       ticker: ticker.toUpperCase(),
@@ -196,35 +238,39 @@ app.get('/events', verifyApiKey, rateLimiter, async (req, res) => {
   try {
     const { ticker, event_type, confidence_min = 0, from_date, limit = 50 } = req.query;
 
-    let query: any = db.collection(collections.events)
-      .where('confidence', '>=', parseFloat(confidence_min as string));
+    let whereClauses: string[] = ['confidence >= ?'];
+    let params: any[] = [parseFloat(confidence_min as string)];
 
     if (ticker) {
-      query = query.where('ticker', '==', (ticker as string).toUpperCase());
+      whereClauses.push('ticker = ?');
+      params.push((ticker as string).toUpperCase());
     }
     if (event_type) {
-      query = query.where('eventType', '==', event_type);
+      whereClauses.push('event_type = ?');
+      params.push(event_type);
     }
     if (from_date) {
-      query = query.where('detectedAt', '>=', new Date(from_date as string));
+      whereClauses.push('detected_at >= ?');
+      params.push(new Date(from_date as string).toISOString());
     }
 
-    query = query.orderBy('detectedAt', 'desc').limit(parseInt(limit as string));
+    const events = await getDatabase().all(`
+      SELECT * FROM ${collections.events}
+      WHERE ${whereClauses.join(' AND ')}
+      ORDER BY detected_at DESC
+      LIMIT ?
+    `, ...params, parseInt(limit as string));
 
-    const snapshot = await query.get();
-    const events = snapshot.docs.map((doc: any) => {
-      const e = doc.data();
-      return {
-        id: doc.id,
-        ticker: e.ticker,
-        eventType: e.eventType,
-        confidence: e.confidence,
-        detectedAt: e.detectedAt.toDate().toISOString(),
-        articleUrl: e.articleUrl,
-      };
-    });
+    const result = events.map((e: any) => ({
+      id: e.id,
+      ticker: e.ticker,
+      eventType: e.event_type,
+      confidence: e.confidence,
+      detectedAt: e.detected_at,
+      articleUrl: e.article_url,
+    }));
 
-    res.json(events);
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -233,12 +279,9 @@ app.get('/events', verifyApiKey, rateLimiter, async (req, res) => {
 // GET /trending
 app.get('/trending', verifyApiKey, rateLimiter, async (req, res) => {
   try {
-    const hours = parseInt(req.query.hours as string) || 24;
     const limit = parseInt(req.query.limit as string) || 20;
-    const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
-    const mentionsSnapshot = await db.collection(collections.mentions).get();
-    const mentions = mentionsSnapshot.docs.map(d => d.data());
+    const mentions = await getDatabase().all(`SELECT * FROM ${collections.mentions}`);
 
     // Aggregate by ticker
     const tickerStats: Record<string, { count: number; sentiments: number[] }> = {};
@@ -248,14 +291,14 @@ app.get('/trending', verifyApiKey, rateLimiter, async (req, res) => {
         tickerStats[mention.ticker] = { count: 0, sentiments: [] };
       }
       tickerStats[mention.ticker].count++;
-      tickerStats[mention.ticker].sentiments.push(mention.entitySentiment);
+      tickerStats[mention.ticker].sentiments.push(mention.entity_sentiment);
     }
 
     const trending = Object.entries(tickerStats)
       .map(([ticker, stats]) => ({
         ticker,
         mentionCount: stats.count,
-        avgSentiment: stats.sentiments.reduce((a, b) => a + b, 0) / stats.sentiments.length,
+        avgSentiment: stats.sentiments.reduce((a: number, b: number) => a + b, 0) / stats.sentiments.length,
       }))
       .sort((a, b) => b.mentionCount - a.mentionCount)
       .slice(0, limit);
@@ -268,4 +311,14 @@ app.get('/trending', verifyApiKey, rateLimiter, async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`🚀 Financial News API running on port ${PORT}`);
+  
+  // Initialize Stock Market WebSocket Server
+  // The WebSocket server shares the same HTTP server and port (8000) but uses a different path (/stock-prices)
+  // Clients can connect via: ws://localhost:8000/stock-prices
+  try {
+    stockWsServer = new StockWebSocketServer(server, '/stock-prices');
+    console.log(`📈 Stock Market WebSocket server initialized on ws://localhost:${PORT}/stock-prices`);
+  } catch (error) {
+    console.error('❌ Failed to initialize Stock Market WebSocket server:', error);
+  }
 });

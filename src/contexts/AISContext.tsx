@@ -39,20 +39,17 @@ export function AISProvider({ children }: AISProviderProps) {
   const [shipTypes, setShipTypes] = useState<Map<number, number>>(new Map()) // MMSI -> ShipType
 
   useEffect(() => {
-    console.log('🌐 Initializing AIS WebSocket connection...')
-    
     let ws: WebSocket | null = null
     let isCleanedUp = false
     let reconnectTimer: NodeJS.Timeout | null = null
     let connectionAttempts = 0
     const MAX_ATTEMPTS = 3
-    let receivedDataCount = 0 // Compteur pour les données reçues
+    let receivedDataCount = 0
 
     const connect = () => {
       if (isCleanedUp) return
       
       connectionAttempts++
-      console.log(`🔄 Connection attempt ${connectionAttempts}/${MAX_ATTEMPTS}`)
 
       ws = new WebSocket('ws://localhost:8000/api/ais-stream')
 
@@ -61,7 +58,6 @@ export function AISProvider({ children }: AISProviderProps) {
           ws?.close()
           return
         }
-        console.log('✅ AIS WebSocket connected (global)')
         setConnected(true)
         setUseDemoData(false)
         connectionAttempts = 0
@@ -75,9 +71,6 @@ export function AISProvider({ children }: AISProviderProps) {
           
           // Ignorer les messages de contrôle
           if (data.type === 'connected' || data.type === 'error' || data.type === 'closed') {
-            if (data.type === 'error') {
-              console.error('❌ AIS error from server:', data.message)
-            }
             return
           }
           
@@ -92,15 +85,6 @@ export function AISProvider({ children }: AISProviderProps) {
                 updated.set(metadata.MMSI, staticData.Type)
                 return updated
               })
-              
-              if (receivedDataCount === 1) {
-                console.log('🎯 First ShipStaticData received:', {
-                  mmsi: metadata.MMSI,
-                  name: staticData.Name,
-                  type: staticData.Type,
-                  typeName: getShipTypeName(staticData.Type)
-                })
-              }
             }
             return
           }
@@ -108,30 +92,8 @@ export function AISProvider({ children }: AISProviderProps) {
           if (data.MessageType === "PositionReport") {
             receivedDataCount++
             
-            // Log le premier navire reçu
-            if (receivedDataCount === 1) {
-              console.log('✅ First data received - connection is working!')
-            }
-            
             const msg = data.Message.PositionReport
             const metadata = data.MetaData
-            
-            // Log le premier navire reçu avec TOUTES les données
-            if (receivedDataCount === 1) {
-              console.log('🚢 First vessel received:', {
-                name: metadata.ShipName,
-                mmsi: metadata.MMSI,
-                lat: msg.Latitude,
-                lon: msg.Longitude,
-                type: metadata.ShipType
-              })
-              console.log('📦 Full message data:', JSON.stringify(data, null, 2))
-            }
-            
-            // Log tous les 100 navires pour voir combien ont un ShipType
-            if (receivedDataCount % 100 === 0) {
-              console.log(`📊 Received ${receivedDataCount} vessels. ShipType present: ${metadata.ShipType !== undefined}`)
-            }
             
             // Utiliser le ShipType du cache si disponible, sinon utiliser celui des métadonnées
             const shipType = shipTypes.get(metadata.MMSI) || metadata.ShipType
@@ -155,34 +117,25 @@ export function AISProvider({ children }: AISProviderProps) {
               const filtered = prev.filter(v => v.mmsi !== vessel.mmsi)
               // Ajouter le nouveau et garder les 20000 plus récents
               const updated = [...filtered, vessel]
-              
-              // Log tous les 100 navires
-              if (updated.length % 100 === 0) {
-                console.log(`📊 Vessels in memory: ${updated.length}`)
-              }
-              
               return updated.slice(-20000)
             })
           }
         } catch (err) {
-          console.error('Error parsing AIS message:', err)
+          // Erreur silencieuse
         }
       }
 
-      ws.onerror = (error) => {
+      ws.onerror = () => {
         if (isCleanedUp) return
-        console.error("❌ AIS WebSocket error:", error)
         setConnected(false)
       }
 
-      ws.onclose = (event) => {
+      ws.onclose = () => {
         if (isCleanedUp) return
-        console.log('🔌 AIS WebSocket closed:', event.code)
         setConnected(false)
         
         // Si on a dépassé le nombre max de tentatives, utiliser les données de démo
         if (connectionAttempts >= MAX_ATTEMPTS) {
-          console.warn('⚠️ Max connection attempts reached - using demo data')
           setUseDemoData(true)
           loadDemoData()
           return
@@ -190,7 +143,6 @@ export function AISProvider({ children }: AISProviderProps) {
         
         // Reconnexion automatique après 5 secondes
         if (!isCleanedUp) {
-          console.log('🔄 Reconnecting in 5 seconds...')
           reconnectTimer = setTimeout(connect, 5000)
         }
       }
@@ -198,7 +150,6 @@ export function AISProvider({ children }: AISProviderProps) {
     
     // Fonction pour charger des données de démo
     const loadDemoData = () => {
-      console.log('📊 Loading demo vessel data...')
       const demoVessels: Vessel[] = [
         // Tankers dans le Golfe Persique
         { mmsi: 123456789, name: "DEMO TANKER 1", lat: 26.5, lon: 56.3, speed: 12.5, course: 90, heading: 90, shipType: "Tanker", destination: "ROTTERDAM", lastUpdate: Date.now() },
@@ -228,7 +179,6 @@ export function AISProvider({ children }: AISProviderProps) {
       isCleanedUp = true
       if (reconnectTimer) clearTimeout(reconnectTimer)
       if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log('🔌 Closing AIS WebSocket...')
         ws.close()
       }
     }

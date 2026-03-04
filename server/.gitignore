@@ -17,12 +17,17 @@ serviceAccountKey.json
 *-credentials.json
 firebase-adminsdk-*.json
 
-# Firebase
+# Firebase (legacy)
 .firebase/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
-# Google Cloud credentials
+# Google Cloud credentials (legacy)
 gcloud-credentials.json
 application_default_credentials.json
+
+# DuckDB database files
+data/
+*.duckdb
+*.duckdb.wal

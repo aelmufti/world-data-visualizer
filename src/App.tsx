@@ -1,13 +1,15 @@
 import { useState } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { SECTORS } from './data/sectors'
 import { useAIProvider } from './hooks/useAIProvider'
 import { useMarketData } from './hooks/useMarketData'
 import AINewsPanel from './components/AINewsPanel'
 import VesselMap from './components/VesselMap'
 import Navbar from './components/Navbar'
+import StockMarketTab from './components/StockMarket/StockMarketTab'
 import { useAIS } from './contexts/AISContext'
 
-export default function App() {
+function SectorialAnalysis() {
   const [activeSector, setActiveSector] = useState(SECTORS[0])
   const [alertMsg, setAlertMsg] = useState<string | null>(null)
   const [showMap, setShowMap] = useState(false)
@@ -36,9 +38,6 @@ export default function App() {
         .stock-row:hover { background: rgba(255,255,255,0.04) !important; }
         .alert-btn:hover { opacity: 0.85; }
       `}</style>
-
-      {/* Navbar */}
-      <Navbar activeSection="sectorial" />
 
       {/* Main Content Container */}
       <div style={{ display: "flex", flex: 1 }}>
@@ -200,6 +199,49 @@ export default function App() {
       {/* Vessel Map Modal */}
       {showMap && <VesselMap onClose={() => setShowMap(false)} />}
       </div>
+    </div>
+  )
+}
+
+export default function App() {
+  const location = useLocation()
+  
+  // Determine active section based on route
+  const getActiveSection = () => {
+    if (location.pathname === '/stock-market') return 'stock-market'
+    if (location.pathname === '/portfolio') return 'portfolio'
+    if (location.pathname === '/alerts') return 'alerts'
+    if (location.pathname === '/settings') return 'settings'
+    return 'sectorial'
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#060B14", color: "#E2E8F0", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .sector-btn:hover { background: rgba(255,255,255,0.06) !important; }
+        .stock-row:hover { background: rgba(255,255,255,0.04) !important; }
+        .alert-btn:hover { opacity: 0.85; }
+      `}</style>
+
+      {/* Navbar */}
+      <Navbar activeSection={getActiveSection()} />
+
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<SectorialAnalysis />} />
+        <Route path="/stock-market" element={<StockMarketTab />} />
+        <Route path="/portfolio" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Portfolio - Coming Soon</div>} />
+        <Route path="/alerts" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Alertes - Coming Soon</div>} />
+        <Route path="/settings" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Paramètres - Coming Soon</div>} />
+      </Routes>
     </div>
   )
 }

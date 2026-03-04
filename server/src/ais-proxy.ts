@@ -6,15 +6,12 @@ import { Server } from 'http';
 // Connexion partagée à AIS Stream
 let sharedAisWs: WebSocket | null = null;
 let messageCount = 0;
+let isConnecting = false; // 🔧 FIX: flag pour éviter les connexions multiples simultanées
 const clients = new Set<WebSocket>();
 
 export function setupAISProxy(server: Server) {
-  const wss = new WebSocketServer({ 
-    server,
-    path: '/api/ais-stream'
-  });
-
-  console.log('🗺️  AIS WebSocket proxy ready on /api/ais-stream');
+  const wss = new WebSocketServer({ noServer: true });
+  const aisPath = '/api/ais-stream';
 
   const API_KEY = process.env.VITE_AISSTREAM_API_KEY;
   
@@ -23,30 +20,47 @@ export function setupAISProxy(server: Server) {
     return wss;
   }
 
+  // Handle upgrade requests for AIS stream
+  server.on('upgrade', (request, socket, head) => {
+    if (request.url === aisPath) {
+      wss.handleUpgrade(request, socket, head, (clientWs) => {
+        wss.emit('connection', clientWs, request);
+      });
+    }
+  });
+
   // Fonction pour créer/maintenir la connexion partagée à AIS Stream
   function ensureAISConnection() {
     if (sharedAisWs && sharedAisWs.readyState === WebSocket.OPEN) {
-      return; // Déjà connecté
+      return;
     }
 
-    if (sharedAisWs && sharedAisWs.readyState === WebSocket.CONNECTING) {
-      return; // Connexion en cours
+    // 🔧 FIX: utiliser le flag isConnecting au lieu de vérifier readyState
+    // car sharedAisWs peut être réassigné pendant que l'ancien est encore en CONNECTING
+    if (isConnecting) {
+      return;
     }
 
+    isConnecting = true;
     console.log('🔄 Creating shared AIS Stream connection...');
-    sharedAisWs = new WebSocket('wss://stream.aisstream.io/v0/stream');
+
+    // 🔧 FIX: référence locale pour éviter le bug de réassignation
+    // sharedAisWs peut changer de valeur avant que les événements se déclenchent
+    const aisWs = new WebSocket('wss://stream.aisstream.io/v0/stream');
+    sharedAisWs = aisWs;
     
-    sharedAisWs.on('open', () => {
+    aisWs.on('open', () => {
       console.log('✅ Shared AIS Stream connection established');
-      
+      isConnecting = false;
+
       const subscriptionMessage = {
         APIKey: API_KEY,
-        BoundingBoxes: [[[-90, -180], [90, 180]]], // Couverture mondiale
-        FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Ajouter ShipStaticData pour avoir le type
+        BoundingBoxes: [[[-90, -180], [90, 180]]],
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"]
       };
       
-      sharedAisWs!.send(JSON.stringify(subscriptionMessage));
-      console.log('📡 Subscription sent to AIS Stream (PositionReport + ShipStaticData)');
+      // 🔧 FIX: utiliser aisWs (référence locale) et non sharedAisWs (globale réassignable)
+      aisWs.send(JSON.stringify(subscriptionMessage));
       
       // Notifier tous les clients connectés
       clients.forEach(client => {
@@ -59,22 +73,11 @@ export function setupAISProxy(server: Server) {
       });
     });
 
-    sharedAisWs.on('message', (data) => {
-      // Compter les messages
+    aisWs.on('message', (data) => {
       try {
         const parsed = JSON.parse(data.toString());
         if (parsed.MessageType === "PositionReport") {
           messageCount++;
-          if (messageCount % 100 === 0) {
-            console.log(`📊 Received ${messageCount} position reports (${clients.size} clients)`);
-          }
-        } else if (parsed.MessageType === "ShipStaticData") {
-          console.log(`🎯 ShipStaticData received for MMSI ${parsed.MetaData.MMSI}: Type ${parsed.Message.ShipStaticData.Type}`);
-        } else if (parsed.MessageType === "StaticDataReport") {
-          const reportB = parsed.Message.StaticDataReport.ReportB;
-          if (reportB && reportB.Valid && reportB.ShipType !== undefined) {
-            console.log(`🎯 StaticDataReport received for MMSI ${parsed.MetaData.MMSI}: Type ${reportB.ShipType}`);
-          }
         }
       } catch (e) {
         // Ignorer les erreurs de parsing
@@ -88,10 +91,10 @@ export function setupAISProxy(server: Server) {
       });
     });
 
-    sharedAisWs.on('error', (error) => {
-      console.error('❌ Shared AIS Stream error:', error.message);
-      
-      // Notifier tous les clients
+    aisWs.on('error', (err) => {
+      console.error('❌ Shared AIS Stream error:', err.message);
+      isConnecting = false; // 🔧 FIX: reset flag en cas d'erreur
+
       clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ 
@@ -102,10 +105,16 @@ export function setupAISProxy(server: Server) {
       });
     });
 
-    sharedAisWs.on('close', (code, reason) => {
-      console.log('🔌 Shared AIS Stream closed:', code, reason.toString() || 'No reason');
-      
-      // Notifier tous les clients
+    aisWs.on('close', (code, reason) => {
+      console.log(`🔌 Shared AIS Stream closed: ${code} ${reason.toString() || 'No reason'}`);
+      isConnecting = false; // 🔧 FIX: reset flag à la fermeture
+
+      // N'effacer sharedAisWs que si c'est bien ce socket qui se ferme
+      // (évite d'effacer un nouveau socket déjà créé)
+      if (sharedAisWs === aisWs) {
+        sharedAisWs = null;
+      }
+
       clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ 
@@ -116,23 +125,17 @@ export function setupAISProxy(server: Server) {
         }
       });
       
-      sharedAisWs = null;
-      
       // Reconnecter après 5 secondes si des clients sont toujours connectés
       if (clients.size > 0) {
-        console.log('🔄 Reconnecting in 5 seconds...');
         setTimeout(ensureAISConnection, 5000);
       }
     });
   }
 
   wss.on('connection', (clientWs) => {
-    console.log(`👤 Client connected to AIS proxy (${clients.size + 1} total)`);
-    
-    // Ajouter le client à la liste
     clients.add(clientWs);
+    console.log(`👤 Client connected to AIS proxy (${clients.size} total)`);
     
-    // S'assurer que la connexion AIS est active
     ensureAISConnection();
     
     // Si déjà connecté, notifier immédiatement le client
@@ -147,7 +150,6 @@ export function setupAISProxy(server: Server) {
       clients.delete(clientWs);
       console.log(`👤 Client disconnected from AIS proxy (${clients.size} remaining)`);
       
-      // Si plus aucun client, fermer la connexion AIS après 30 secondes
       if (clients.size === 0) {
         console.log('⏱️  No more clients - will close AIS connection in 30s if no reconnection');
         setTimeout(() => {
@@ -160,8 +162,7 @@ export function setupAISProxy(server: Server) {
       }
     });
 
-    clientWs.on('error', (error) => {
-      console.error('Client WebSocket error:', error.message);
+    clientWs.on('error', () => {
       clients.delete(clientWs);
     });
   });

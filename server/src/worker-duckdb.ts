@@ -1,13 +1,20 @@
 import axios from 'axios';
-import { db, collections } from './firebase.js';
+import { initDatabase, getDatabase, collections } from './database.js';
 import { nlpProcessor } from './nlp.js';
 import { Company } from './types.js';
+import { randomUUID } from 'crypto';
 
 class IngestionWorker {
   private lastIngestedAt: Date;
+  private db: any;
 
   constructor() {
-    this.lastIngestedAt = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
+    this.lastIngestedAt = new Date(Date.now() - 60 * 60 * 1000);
+  }
+
+  async init() {
+    await initDatabase();
+    this.db = getDatabase();
   }
 
   async fetchNewArticles() {
@@ -25,33 +32,25 @@ class IngestionWorker {
   }
 
   async alreadyInDb(url: string): Promise<boolean> {
-    const snapshot = await db.collection(collections.articles)
-      .where('url', '==', url)
-      .limit(1)
-      .get();
-    return !snapshot.empty;
+    const result = await this.db.all(`
+      SELECT id FROM ${collections.articles} WHERE url = ? LIMIT 1
+    `, url);
+    return result.length > 0;
   }
 
   async getCompanies(): Promise<Company[]> {
-    const snapshot = await db.collection(collections.companies).get();
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Company[];
+    const companies = await this.db.all(`SELECT * FROM ${collections.companies}`);
+    return companies as Company[];
   }
 
   async processArticle(articleData: any) {
     try {
-      // Check if already processed
       if (await this.alreadyInDb(articleData.url)) {
         console.log(`Article already in DB: ${articleData.url}`);
         return;
       }
 
-      // Get companies
       const companies = await this.getCompanies();
-
-      // Process through NLP
       const result = nlpProcessor.process(articleData, companies);
 
       if (result.detectedCompanies.length === 0) {
@@ -59,56 +58,50 @@ class IngestionWorker {
         return;
       }
 
-      // Save article
-      const articleRef = await db.collection(collections.articles).add({
-        url: articleData.url,
-        title: articleData.title,
-        body: articleData.body,
-        publishedAt: new Date(articleData.publishedAt),
-        ingestedAt: new Date(),
-        sourceDomain: articleData.sourceDomain,
-        language: articleData.language || 'en',
-        rawSentiment: result.rawSentiment,
-      });
+      const articleId = randomUUID();
+      
+      await this.db.run(`
+        INSERT INTO ${collections.articles} 
+        (id, url, title, body, published_at, ingested_at, source_domain, raw_sentiment)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `, articleId, articleData.url, articleData.title, articleData.body,
+         new Date(articleData.publishedAt).toISOString(), new Date().toISOString(),
+         articleData.sourceDomain, result.rawSentiment);
 
-      // Save mentions
       for (const company of result.detectedCompanies) {
-        await db.collection(collections.mentions).add({
-          articleId: articleRef.id,
-          companyId: (company as any).companyId,
-          ticker: company.ticker,
-          mentionCount: company.mentionCount,
-          entitySentiment: (company as any).entitySentiment,
-          isPrimarySubject: (company as any).isPrimarySubject,
-          eventTags: result.events.map(e => e[0]),
-        });
+        const mentionId = randomUUID();
+        await this.db.run(`
+          INSERT INTO ${collections.mentions}
+          (id, article_id, company_id, ticker, mention_count, entity_sentiment, is_primary_subject, event_tags)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, mentionId, articleId, (company as any).companyId, company.ticker,
+           company.mentionCount, (company as any).entitySentiment, 
+           (company as any).isPrimarySubject, result.events.map(e => e[0]));
       }
 
-      // Save events
       for (const [eventType, confidence] of result.events) {
         for (const company of result.detectedCompanies) {
           if ((company as any).isPrimarySubject) {
-            await db.collection(collections.events).add({
-              articleId: articleRef.id,
-              companyId: (company as any).companyId,
-              ticker: company.ticker,
-              eventType,
-              confidence,
-              detectedAt: new Date(),
-              articleUrl: articleData.url,
-            });
+            const eventId = randomUUID();
+            await this.db.run(`
+              INSERT INTO ${collections.events}
+              (id, article_id, company_id, ticker, event_type, confidence, detected_at, article_url)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, eventId, articleId, (company as any).companyId, company.ticker,
+               eventType, confidence, new Date().toISOString(), articleData.url);
           }
         }
       }
 
       const latency = (Date.now() - new Date(articleData.publishedAt).getTime()) / 1000;
-      console.log(`✅ Processed article ${articleRef.id} with latency ${latency.toFixed(2)}s`);
+      console.log(`✅ Processed article ${articleId} with latency ${latency.toFixed(2)}s`);
     } catch (error: any) {
       console.error('Error processing article:', error.message);
     }
   }
 
   async run() {
+    await this.init();
     console.log('🚀 Starting ingestion worker...');
 
     while (true) {
@@ -127,7 +120,6 @@ class IngestionWorker {
         console.error('Error in worker loop:', error.message);
       }
 
-      // Wait 15 seconds
       await new Promise(resolve => setTimeout(resolve, 15000));
     }
   }
