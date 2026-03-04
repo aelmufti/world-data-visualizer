@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DuckDB Viewer - Financial News</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #60a5fa;
+    }
+    .warning {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #fca5a5;
+    }
+    .query-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .quick-queries {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .quick-query-btn {
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      color: #60a5fa;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .quick-query-btn:hover {
+      background: rgba(96, 165, 250, 0.2);
+      border-color: rgba(96, 165, 250, 0.5);
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      color: #e2e8f0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+    .btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #2563eb; }
+    .btn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+    .results {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .results h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #94a3b8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      color: #fca5a5;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #94a3b8;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 DuckDB Viewer - Financial News Database</h1>
+    <p style="color: #94a3b8; margin-bottom: 20px;">Query your financial news database</p>
+
+    <div class="warning">
+      ⚠️ <strong>Important:</strong> Stop the server before using this tool. DuckDB only allows one connection at a time.
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Articles</div>
+        <div class="stat-value" id="articleCount">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Companies</div>
+        <div class="stat-value" id="companyCount">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Events</div>
+        <div class="stat-value" id="eventCount">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Mentions</div>
+        <div class="stat-value" id="mentionCount">-</div>
+      </div>
+    </div>
+
+    <div class="query-section">
+      <h2 style="font-size: 16px; margin-bottom: 15px; color: #cbd5e1;">Quick Queries</h2>
+      <div class="quick-queries">
+        <button class="quick-query-btn" onclick="setQuery('SELECT COUNT(*) as total FROM articles')">
+          📰 Count Articles
+        </button>
+        <button class="quick-query-btn" onclick="setQuery('SELECT * FROM articles ORDER BY published_at DESC LIMIT 20')">
+          🕐 Recent Articles
+        </button>
+        <button class="quick-query-btn" onclick="setQuery('SELECT * FROM companies LIMIT 50')">
+          🏢 List Companies
+        </button>
+        <button class="quick-query-btn" onclick="setQuery('SELECT a.title, m.ticker, m.entity_sentiment FROM articles a JOIN article_mentions m ON a.id = m.article_id ORDER BY a.published_at DESC LIMIT 30')">
+          🔗 Articles with Companies
+        </button>
+        <button class="quick-query-btn" onclick="setQuery('SELECT ticker, event_type, confidence, detected_at FROM events ORDER BY detected_at DESC LIMIT 50')">
+          ⚡ Recent Events
+        </button>
+        <button class="quick-query-btn" onclick="setQuery('SELECT source_domain, COUNT(*) as count FROM articles GROUP BY source_domain ORDER BY count DESC')">
+          📊 Articles by Source
+        </button>
+      </div>
+
+      <textarea id="queryInput" placeholder="Enter your SQL query here...">SELECT * FROM articles ORDER BY published_at DESC LIMIT 10</textarea>
+      <button class="btn" onclick="executeQuery()">Execute Query</button>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+      <h2>Results</h2>
+      <div id="resultsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8000';
+
+    async function loadStats() {
+      try {
+        const queries = [
+          { id: 'articleCount', query: 'SELECT COUNT(*) as count FROM articles' },
+          { id: 'companyCount', query: 'SELECT COUNT(*) as count FROM companies' },
+          { id: 'eventCount', query: 'SELECT COUNT(*) as count FROM events' },
+          { id: 'mentionCount', query: 'SELECT COUNT(*) as count FROM article_mentions' }
+        ];
+
+        for (const { id, query } of queries) {
+          try {
+            const response = await fetch(`${API_BASE}/api/db/query`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+            if (data.results && data.results[0]) {
+              document.getElementById(id).textContent = data.results[0].count.toLocaleString();
+            }
+          } catch (err) {
+            document.getElementById(id).textContent = 'N/A';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    function setQuery(query) {
+      document.getElementById('queryInput').value = query;
+    }
+
+    async function executeQuery() {
+      const query = document.getElementById('queryInput').value.trim();
+      if (!query) return;
+
+      const resultsDiv = document.getElementById('results');
+      const resultsContent = document.getElementById('resultsContent');
+      
+      resultsDiv.style.display = 'block';
+      resultsContent.innerHTML = '<div class="loading">Executing query...</div>';
+
+      try {
+        const response = await fetch(`${API_BASE}/api/db/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Query failed');
+        }
+
+        if (!data.results || data.results.length === 0) {
+          resultsContent.innerHTML = '<p style="color: #94a3b8;">No results found.</p>';
+          return;
+        }
+
+        // Build table
+        const columns = Object.keys(data.results[0]);
+        let html = '<table><thead><tr>';
+        columns.forEach(col => {
+          html += `<th>${col}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        data.results.forEach(row => {
+          html += '<tr>';
+          columns.forEach(col => {
+            let value = row[col];
+            if (value === null) value = '<em style="color: #64748b;">null</em>';
+            else if (typeof value === 'object') value = JSON.stringify(value);
+            else if (typeof value === 'string' && value.length > 100) value = value.substring(0, 100) + '...';
+            html += `<td>${value}</td>`;
+          });
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        html += `<p style="margin-top: 15px; color: #94a3b8; font-size: 12px;">${data.results.length} row(s) returned</p>`;
+        resultsContent.innerHTML = html;
+
+      } catch (error) {
+        resultsContent.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+      }
+    }
+
+    // Load stats on page load
+    loadStats();
+  </script>
+</body>
+</html>

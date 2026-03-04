@@ -9,6 +9,8 @@ import historicalDataRouter from './stock-market/historical-data-endpoint.js';
 import searchRouter from './stock-market/search-endpoint.js';
 import marketStatusRouter from './stock-market/market-status-endpoint.js';
 import quoteRouter from './stock-market/quote-endpoint.js';
+import companyRouter from './company-endpoint.js';
+import politicianTradingRouter from './politician-trading-endpoint.js';
 import { setupAISProxy } from './ais-proxy.js';
 import { StockWebSocketServer } from './stock-market/websocket-server.js';
 import { RSSWorker } from './rss-worker-duckdb.js';
@@ -80,6 +82,33 @@ app.use('/api', searchRouter);
 
 // Routes de statut de marché
 app.use('/api', marketStatusRouter);
+
+// Routes de compagnies
+app.use('/api/companies', companyRouter);
+
+// Routes de trading politique
+app.use('/api', politicianTradingRouter);
+
+// Database query endpoint (for development/debugging)
+app.post('/api/db/query', async (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+
+    // Only allow SELECT queries for safety
+    if (!query.trim().toUpperCase().startsWith('SELECT')) {
+      return res.status(400).json({ error: 'Only SELECT queries are allowed' });
+    }
+
+    const results = await getDatabase().all(query);
+    res.json({ results, count: results.length });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Middleware: API Key verification
 const verifyApiKey = async (req: any, res: any, next: any) => {

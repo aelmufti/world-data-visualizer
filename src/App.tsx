@@ -5,9 +5,11 @@ import { useAIProvider } from './hooks/useAIProvider'
 import { useMarketData } from './hooks/useMarketData'
 import AINewsPanel from './components/AINewsPanel'
 import TopNewsPanel from './components/TopNewsPanel'
+import CompanyInfoPanel from './components/CompanyInfoPanel'
 import VesselMap from './components/VesselMap'
 import Navbar from './components/Navbar'
 import StockMarketTab from './components/StockMarket/StockMarketTab'
+import PoliticianTradingTab from './components/PoliticianTradingTab'
 import { useAIS } from './contexts/AISContext'
 
 function SectorialAnalysis() {
@@ -194,6 +196,9 @@ function SectorialAnalysis() {
             {/* Top News - Last 48h */}
             <TopNewsPanel sector={activeSector.id} key={"topnews_" + activeSector.id} />
             
+            {/* Company Info */}
+            <CompanyInfoPanel />
+            
             {/* AI News */}
             <AINewsPanel sector={activeSector} key={"news_" + activeSector.id} />
           </div>
@@ -213,6 +218,7 @@ export default function App() {
   // Determine active section based on route
   const getActiveSection = () => {
     if (location.pathname === '/stock-market') return 'stock-market'
+    if (location.pathname === '/politician-trading') return 'politician-trading'
     if (location.pathname === '/portfolio') return 'portfolio'
     if (location.pathname === '/alerts') return 'alerts'
     if (location.pathname === '/settings') return 'settings'
@@ -242,6 +248,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<SectorialAnalysis />} />
         <Route path="/stock-market" element={<StockMarketTab />} />
+        <Route path="/politician-trading" element={<PoliticianTradingTab />} />
         <Route path="/portfolio" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Portfolio - Coming Soon</div>} />
         <Route path="/alerts" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Alertes - Coming Soon</div>} />
         <Route path="/settings" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Paramètres - Coming Soon</div>} />
