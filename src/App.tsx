@@ -10,6 +10,7 @@ import VesselMap from './components/VesselMap'
 import Navbar from './components/Navbar'
 import StockMarketTab from './components/StockMarket/StockMarketTab'
 import PoliticianTradingTab from './components/PoliticianTradingTab'
+import CongressTrackerTab from './components/CongressTrackerTab'
 import { useAIS } from './contexts/AISContext'
 
 function SectorialAnalysis() {
@@ -249,6 +250,7 @@ export default function App() {
         <Route path="/" element={<SectorialAnalysis />} />
         <Route path="/stock-market" element={<StockMarketTab />} />
         <Route path="/politician-trading" element={<PoliticianTradingTab />} />
+        <Route path="/congress-tracker" element={<CongressTrackerTab />} />
         <Route path="/portfolio" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Portfolio - Coming Soon</div>} />
         <Route path="/alerts" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Alertes - Coming Soon</div>} />
         <Route path="/settings" element={<div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Paramètres - Coming Soon</div>} />

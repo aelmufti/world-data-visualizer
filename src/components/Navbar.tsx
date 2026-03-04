@@ -4,7 +4,7 @@ import { stockDataService } from '../services/stockDataService'
 import type { SearchResult } from '../types/stock-market'
 
 interface NavbarProps {
-  activeSection?: 'sectorial' | 'stock-market' | 'politician-trading' | 'portfolio' | 'alerts' | 'settings'
+  activeSection?: 'sectorial' | 'stock-market' | 'politician-trading' | 'congress-tracker' | 'portfolio' | 'alerts' | 'settings'
 }
 
 export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
@@ -61,6 +61,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
     { id: 'sectorial', label: 'Analyse Sectorielle', icon: '📊', path: '/' },
     { id: 'stock-market', label: 'Marché Boursier', icon: '📈', path: '/stock-market' },
     { id: 'politician-trading', label: 'Trading Politique', icon: '🏛️', path: '/politician-trading' },
+    { id: 'congress-tracker', label: 'Congress Tracker', icon: '🗳️', path: '/congress-tracker' },
     { id: 'portfolio', label: 'Portfolio', icon: '💼', path: '/portfolio' },
     { id: 'alerts', label: 'Alertes', icon: '🔔', path: '/alerts' },
     { id: 'settings', label: 'Paramètres', icon: '⚙️', path: '/settings' }

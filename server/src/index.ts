@@ -11,10 +11,13 @@ import marketStatusRouter from './stock-market/market-status-endpoint.js';
 import quoteRouter from './stock-market/quote-endpoint.js';
 import companyRouter from './company-endpoint.js';
 import politicianTradingRouter from './politician-trading-endpoint.js';
+import congressRouter from './congress-tracker/endpoints.js';
 import { setupAISProxy } from './ais-proxy.js';
 import { StockWebSocketServer } from './stock-market/websocket-server.js';
 import { RSSWorker } from './rss-worker-duckdb.js';
 import { NewsWebSocketServer } from './news-websocket-server.js';
+import { congressPipeline } from './congress-tracker/pipeline.js';
+import { congressPoller } from './congress-tracker/poller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -39,7 +42,8 @@ app.get('/api/health', (req, res) => {
       database: db ? 'connected' : 'disconnected',
       websocket: stockWsServer ? 'running' : 'stopped',
       newsWebsocket: newsWsServer ? 'running' : 'stopped',
-      rssWorker: rssWorker ? 'running' : 'stopped'
+      rssWorker: rssWorker ? 'running' : 'stopped',
+      congressTracker: congressPipeline ? 'running' : 'stopped'
     }
   });
 });
@@ -48,9 +52,30 @@ app.get('/api/health', (req, res) => {
 let db: any;
 let rssWorker: RSSWorker | null = null;
 
-initDatabase().then((database) => {
+initDatabase().then(async (database) => {
   db = database;
   console.log('✅ Database initialized');
+  
+  // Initialize Congress tracker pipeline
+  await congressPipeline.initialize();
+  
+  // Start Congress poller
+  await congressPoller.start();
+  
+  // Initialize WebSocket servers AFTER database is ready
+  try {
+    stockWsServer = new StockWebSocketServer(server, '/stock-prices');
+    console.log(`📈 Stock Market WebSocket server initialized on ws://localhost:${PORT}/stock-prices`);
+  } catch (error) {
+    console.error('❌ Failed to initialize Stock Market WebSocket server:', error);
+  }
+
+  try {
+    newsWsServer = new NewsWebSocketServer(server, '/news-updates');
+    console.log(`📰 News WebSocket server initialized on ws://localhost:${PORT}/news-updates`);
+  } catch (error) {
+    console.error('❌ Failed to initialize News WebSocket server:', error);
+  }
   
   // Start RSS worker after database is ready
   rssWorker = new RSSWorker();
@@ -88,6 +113,9 @@ app.use('/api/companies', companyRouter);
 
 // Routes de trading politique
 app.use('/api', politicianTradingRouter);
+
+// Routes de Congress tracker
+app.use('/api/congress', congressRouter);
 
 // Database query endpoint (for development/debugging)
 app.post('/api/db/query', async (req, res) => {
@@ -353,22 +381,4 @@ app.get('/trending', verifyApiKey, rateLimiter, async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`🚀 Financial News API running on port ${PORT}`);
-  
-  // Initialize Stock Market WebSocket Server
-  // The WebSocket server shares the same HTTP server and port (8000) but uses a different path (/stock-prices)
-  // Clients can connect via: ws://localhost:8000/stock-prices
-  try {
-    stockWsServer = new StockWebSocketServer(server, '/stock-prices');
-    console.log(`📈 Stock Market WebSocket server initialized on ws://localhost:${PORT}/stock-prices`);
-  } catch (error) {
-    console.error('❌ Failed to initialize Stock Market WebSocket server:', error);
-  }
-
-  // Initialize News WebSocket Server
-  try {
-    newsWsServer = new NewsWebSocketServer(server, '/news-updates');
-    console.log(`📰 News WebSocket server initialized on ws://localhost:${PORT}/news-updates`);
-  } catch (error) {
-    console.error('❌ Failed to initialize News WebSocket server:', error);
-  }
 });

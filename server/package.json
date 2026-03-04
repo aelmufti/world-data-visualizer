@@ -13,6 +13,7 @@
     "seed": "tsx src/seed-duckdb.ts",
     "test-db": "node test-duckdb.mjs",
     "create-api-key": "tsx src/create-api-key-duckdb.ts",
+    "test:congress": "tsx test-congress-tracker.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui"
