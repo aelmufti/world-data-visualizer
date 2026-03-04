@@ -10,7 +10,7 @@ const router = Router();
  * Query parameters:
  * - q: Search query (required)
  * - limit: Maximum number of results (default: 10)
- * - types: Comma-separated list of types to filter (stock, index, etf)
+ * - types: Comma-separated list of types to filter (stock, index, etf, bond, trust, commodity, crypto)
  * 
  * Example: /api/stock/search?q=apple&limit=5&types=stock,etf
  */
@@ -34,20 +34,20 @@ router.get('/stock/search', (req: Request, res: Response) => {
     }
 
     // Parse types parameter
-    let parsedTypes: ('stock' | 'index' | 'etf')[] | undefined;
+    let parsedTypes: ('stock' | 'index' | 'etf' | 'bond' | 'trust' | 'commodity' | 'crypto')[] | undefined;
     if (types && typeof types === 'string') {
       const typeArray = types.split(',').map(t => t.trim().toLowerCase());
-      const validTypes = ['stock', 'index', 'etf'];
+      const validTypes = ['stock', 'index', 'etf', 'bond', 'trust', 'commodity', 'crypto'];
       
       // Validate all types are valid
       const invalidTypes = typeArray.filter(t => !validTypes.includes(t));
       if (invalidTypes.length > 0) {
         return res.status(400).json({
-          error: `Invalid types: ${invalidTypes.join(', ')}. Valid types are: stock, index, etf`
+          error: `Invalid types: ${invalidTypes.join(', ')}. Valid types are: ${validTypes.join(', ')}`
         });
       }
       
-      parsedTypes = typeArray as ('stock' | 'index' | 'etf')[];
+      parsedTypes = typeArray as ('stock' | 'index' | 'etf' | 'bond' | 'trust' | 'commodity' | 'crypto')[];
     }
 
     // Perform search

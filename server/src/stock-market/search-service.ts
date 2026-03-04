@@ -5,7 +5,7 @@ export interface SymbolEntry {
   symbol: string;
   name: string;
   exchange: string;
-  type: 'stock' | 'index' | 'etf';
+  type: 'stock' | 'index' | 'etf' | 'bond' | 'trust' | 'commodity' | 'crypto';
   sector?: string;
   country: string;
 }
@@ -14,13 +14,13 @@ export interface SearchResult {
   symbol: string;
   name: string;
   exchange: string;
-  type: 'stock' | 'index' | 'etf';
+  type: 'stock' | 'index' | 'etf' | 'bond' | 'trust' | 'commodity' | 'crypto';
 }
 
 export interface SearchOptions {
   query: string;
   limit?: number;
-  types?: ('stock' | 'index' | 'etf')[];
+  types?: ('stock' | 'index' | 'etf' | 'bond' | 'trust' | 'commodity' | 'crypto')[];
 }
 
 class StockSearchService {
@@ -28,7 +28,7 @@ class StockSearchService {
 
   constructor() {
     // Configure Fuse.js for fuzzy search on symbol and company name
-    const fuseOptions: Fuse.IFuseOptions<SymbolEntry> = {
+    const fuseOptions = {
       keys: [
         { name: 'symbol', weight: 2 }, // Higher weight for symbol matches
         { name: 'name', weight: 1 }
@@ -39,7 +39,7 @@ class StockSearchService {
       ignoreLocation: true, // Search anywhere in the string
     };
 
-    this.fuse = new Fuse(symbolDatabase as SymbolEntry[], fuseOptions);
+    this.fuse = new Fuse<SymbolEntry>(symbolDatabase as SymbolEntry[], fuseOptions);
   }
 
   /**
@@ -84,7 +84,7 @@ class StockSearchService {
    * Get symbol by exact match
    */
   getSymbol(symbol: string): SymbolEntry | undefined {
-    return symbolDatabase.find(entry => entry.symbol === symbol);
+    return (symbolDatabase as SymbolEntry[]).find(entry => entry.symbol === symbol);
   }
 }
 

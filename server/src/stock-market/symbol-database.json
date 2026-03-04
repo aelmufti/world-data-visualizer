@@ -443,9 +443,7 @@
     "exchange": "INDEX",
     "type": "index",
     "country": "HK"
-  }
-]
-,
+  },
   {
     "symbol": "IVV",
     "name": "iShares Core S&P 500 ETF",
