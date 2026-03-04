@@ -4,6 +4,7 @@ import { SECTORS } from './data/sectors'
 import { useAIProvider } from './hooks/useAIProvider'
 import { useMarketData } from './hooks/useMarketData'
 import AINewsPanel from './components/AINewsPanel'
+import TopNewsPanel from './components/TopNewsPanel'
 import VesselMap from './components/VesselMap'
 import Navbar from './components/Navbar'
 import StockMarketTab from './components/StockMarket/StockMarketTab'
@@ -190,6 +191,9 @@ function SectorialAnalysis() {
 
           {/* Right Column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Top News - Last 48h */}
+            <TopNewsPanel sector={activeSector.id} key={"topnews_" + activeSector.id} />
+            
             {/* AI News */}
             <AINewsPanel sector={activeSector} key={"news_" + activeSector.id} />
           </div>

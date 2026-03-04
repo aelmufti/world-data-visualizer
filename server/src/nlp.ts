@@ -45,19 +45,21 @@ export class NLPProcessor {
           continue;
         }
 
-        // Check official name (fuzzy)
-        if (this.fuzzyMatch(org, company.officialName)) {
+        // Check official name (fuzzy) - handle both officialName and name fields
+        const companyName = (company as any).officialName || (company as any).name;
+        if (companyName && this.fuzzyMatch(org, companyName)) {
           detected.push({
             companyId: company.id,
             ticker: company.ticker,
-            mentionCount: this.countOccurrences(text, company.officialName),
+            mentionCount: this.countOccurrences(text, companyName),
           });
           continue;
         }
 
-        // Check aliases
-        for (const alias of company.aliases) {
-          if (this.fuzzyMatch(org, alias)) {
+        // Check aliases if they exist
+        const aliases = company.aliases || [];
+        for (const alias of aliases) {
+          if (alias && this.fuzzyMatch(org, alias)) {
             detected.push({
               companyId: company.id,
               ticker: company.ticker,
@@ -73,6 +75,8 @@ export class NLPProcessor {
   }
 
   analyzeEntitySentiment(text: string, entity: string): number {
+    if (!entity || !text) return 0;
+    
     const doc = nlp(text);
     const sentences = doc.sentences().out('array') as string[];
     const entitySentences = sentences.filter((s: string) =>
@@ -105,14 +109,18 @@ export class NLPProcessor {
   }
 
   process(article: any, companies: Company[]) {
-    const text = `${article.title} ${article.body}`;
+    const text = `${article.title || ''} ${article.body || ''}`;
 
     // Detect companies
     const detectedCompanies = this.detectCompanies(text, companies);
 
     // Analyze sentiment for each
     for (const company of detectedCompanies) {
-      (company as any).entitySentiment = this.analyzeEntitySentiment(text, company.ticker);
+      if (company.ticker) {
+        (company as any).entitySentiment = this.analyzeEntitySentiment(text, company.ticker);
+      } else {
+        (company as any).entitySentiment = 0;
+      }
     }
 
     // Determine primary subject
@@ -138,6 +146,7 @@ export class NLPProcessor {
   }
 
   private fuzzyMatch(str1: string, str2: string): boolean {
+    if (!str1 || !str2) return false;
     const s1 = str1.toLowerCase();
     const s2 = str2.toLowerCase();
     return s1.includes(s2) || s2.includes(s1) || this.levenshtein(s1, s2) < 3;

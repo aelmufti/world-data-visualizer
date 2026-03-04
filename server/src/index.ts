@@ -11,6 +11,8 @@ import marketStatusRouter from './stock-market/market-status-endpoint.js';
 import quoteRouter from './stock-market/quote-endpoint.js';
 import { setupAISProxy } from './ais-proxy.js';
 import { StockWebSocketServer } from './stock-market/websocket-server.js';
+import { RSSWorker } from './rss-worker-duckdb.js';
+import { NewsWebSocketServer } from './news-websocket-server.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -21,6 +23,7 @@ const server = createServer(app);
 
 // Initialize Stock Market WebSocket Server on port 8001
 let stockWsServer: StockWebSocketServer | null = null;
+let newsWsServer: NewsWebSocketServer | null = null;
 
 app.use(cors());
 app.use(express.json());
@@ -32,16 +35,26 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       database: db ? 'connected' : 'disconnected',
-      websocket: stockWsServer ? 'running' : 'stopped'
+      websocket: stockWsServer ? 'running' : 'stopped',
+      newsWebsocket: newsWsServer ? 'running' : 'stopped',
+      rssWorker: rssWorker ? 'running' : 'stopped'
     }
   });
 });
 
 // Initialize database
 let db: any;
+let rssWorker: RSSWorker | null = null;
+
 initDatabase().then((database) => {
   db = database;
   console.log('✅ Database initialized');
+  
+  // Start RSS worker after database is ready
+  rssWorker = new RSSWorker();
+  rssWorker.run().catch((error) => {
+    console.error('❌ RSS Worker failed:', error);
+  });
 }).catch((error) => {
   console.error('❌ Database initialization failed:', error);
   process.exit(1);
@@ -320,5 +333,13 @@ server.listen(PORT, () => {
     console.log(`📈 Stock Market WebSocket server initialized on ws://localhost:${PORT}/stock-prices`);
   } catch (error) {
     console.error('❌ Failed to initialize Stock Market WebSocket server:', error);
+  }
+
+  // Initialize News WebSocket Server
+  try {
+    newsWsServer = new NewsWebSocketServer(server, '/news-updates');
+    console.log(`📰 News WebSocket server initialized on ws://localhost:${PORT}/news-updates`);
+  } catch (error) {
+    console.error('❌ Failed to initialize News WebSocket server:', error);
   }
 });

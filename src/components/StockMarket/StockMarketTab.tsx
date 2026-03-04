@@ -118,16 +118,34 @@ export default function StockMarketTab() {
         selectedSymbol: symbol,
         activeView: 'chart'
       }))
+    } else if (!symbol && state.selectedSymbol && state.activeView === 'chart') {
+      // If URL is cleared but we're still in chart view with a symbol, clear the symbol
+      setState(prev => ({
+        ...prev,
+        selectedSymbol: null
+      }))
     }
-  }, [searchParams, state.selectedSymbol])
+  }, [searchParams])
 
   const handleViewChange = (view: StockMarketState['activeView']) => {
+    // Always change the view immediately
     setState(prev => ({ ...prev, activeView: view }))
+    
+    // Clear symbol and URL when switching away from chart view
+    if (view !== 'chart' && state.selectedSymbol) {
+      setState(prev => ({ ...prev, selectedSymbol: null }))
+      setSearchParams({})
+    }
   }
 
   const handleSymbolSelect = (symbol: string) => {
     setState(prev => ({ ...prev, selectedSymbol: symbol, activeView: 'chart' }))
     setSearchParams({ symbol })
+  }
+
+  const handleClearSymbol = () => {
+    setState(prev => ({ ...prev, selectedSymbol: null, activeView: 'overview' }))
+    setSearchParams({}) // Clear URL parameters
   }
 
   const handleAddToWatchlist = (symbol: string) => {
@@ -306,7 +324,7 @@ export default function StockMarketTab() {
           borderRadius: 8,
           padding: 4
         }}>
-          {(['overview', 'chart', 'heatmap', 'comparison'] as const).map(view => (
+          {(['overview', 'heatmap', 'comparison'] as const).map(view => (
             <button
               key={view}
               onClick={() => handleViewChange(view)}
@@ -324,7 +342,6 @@ export default function StockMarketTab() {
               }}
             >
               {view === 'overview' ? 'Vue d\'ensemble' : 
-               view === 'chart' ? 'Graphique' :
                view === 'heatmap' ? 'Carte thermique' :
                'Comparaison'}
             </button>
@@ -377,26 +394,6 @@ export default function StockMarketTab() {
                   onIndexClick={handleSymbolSelect}
                 />
               </div>
-
-              {/* Stock Search */}
-              <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 12,
-                padding: 24
-              }}>
-                <div style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 11,
-                  letterSpacing: 2,
-                  color: '#64748B',
-                  textTransform: 'uppercase',
-                  marginBottom: 16
-                }}>
-                  Rechercher une action
-                </div>
-                <StockSearch onSelect={handleSymbolSelect} />
-              </div>
             </div>
 
             {/* Sidebar */}
@@ -424,40 +421,114 @@ export default function StockMarketTab() {
         )}
 
         {state.activeView === 'chart' && state.selectedSymbol && (
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <StockDetailView
-                symbol={state.selectedSymbol}
-                onAddToWatchlist={handleAddToWatchlist}
-                onRemoveFromWatchlist={handleRemoveFromWatchlist}
-                isInWatchlist={state.watchlist.includes(state.selectedSymbol)}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <WatchlistPanel
-                symbols={state.watchlist}
-                prices={prices}
-                onAdd={handleAddToWatchlist}
-                onRemove={handleRemoveFromWatchlist}
-                onReorder={handleReorderWatchlist}
-              />
-              <AlertPanel
-                alerts={state.alerts}
-                onCreate={handleAddAlert}
-                onDelete={handleRemoveAlert}
-                onEdit={(id, updates) => {
-                  setState(prev => ({
-                    ...prev,
-                    alerts: prev.alerts.map(a => a.id === id ? { ...a, ...updates } : a)
-                  }))
-                }}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Back Button */}
+            <button
+              onClick={handleClearSymbol}
+              style={{
+                alignSelf: 'flex-start',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 16px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8,
+                color: '#94A3B8',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
+                e.currentTarget.style.color = '#60A5FA';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.color = '#94A3B8';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 12L6 8l4-4" />
+              </svg>
+              Retour à la vue d'ensemble
+            </button>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <StockDetailView
+                  symbol={state.selectedSymbol}
+                  onAddToWatchlist={handleAddToWatchlist}
+                  onRemoveFromWatchlist={handleRemoveFromWatchlist}
+                  isInWatchlist={state.watchlist.includes(state.selectedSymbol)}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <WatchlistPanel
+                  symbols={state.watchlist}
+                  prices={prices}
+                  onAdd={handleAddToWatchlist}
+                  onRemove={handleRemoveFromWatchlist}
+                  onReorder={handleReorderWatchlist}
+                />
+                <AlertPanel
+                  alerts={state.alerts}
+                  onCreate={handleAddAlert}
+                  onDelete={handleRemoveAlert}
+                  onEdit={(id, updates) => {
+                    setState(prev => ({
+                      ...prev,
+                      alerts: prev.alerts.map(a => a.id === id ? { ...a, ...updates } : a)
+                    }))
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}
 
         {state.activeView === 'heatmap' && (
-          <HeatmapView onStockSelect={handleSymbolSelect} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {state.selectedSymbol && (
+              <button
+                onClick={handleClearSymbol}
+                style={{
+                  alignSelf: 'flex-start',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 16px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 8,
+                  color: '#94A3B8',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
+                  e.currentTarget.style.color = '#60A5FA';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.color = '#94A3B8';
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 12L6 8l4-4" />
+                </svg>
+                Retour à la carte thermique
+              </button>
+            )}
+            <HeatmapView onStockSelect={handleSymbolSelect} />
+          </div>
         )}
 
         {state.activeView === 'comparison' && (

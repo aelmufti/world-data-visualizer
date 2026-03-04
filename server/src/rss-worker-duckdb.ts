@@ -113,7 +113,7 @@ class RSSWorker {
         INSERT INTO ${collections.articles}
         (id, url, title, body, published_at, ingested_at, source_domain, raw_sentiment)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `, articleId, articleData.url, articleData.title, articleData.body,
+      `, articleId, articleData.url, articleData.title, articleData.body || '',
          articleData.publishedAt.toISOString(), new Date().toISOString(),
          articleData.sourceDomain, result.rawSentiment);
 
@@ -148,7 +148,7 @@ class RSSWorker {
         : 'no companies';
       console.log(`✅ ${articleData.title.substring(0, 60)}... [${companiesStr}] - ${latency.toFixed(0)}s`);
     } catch (error: any) {
-      console.error('Error processing article:', error.message);
+      console.error('Error processing article:', error.message, error.stack);
     }
   }
 
@@ -177,5 +177,4 @@ class RSSWorker {
   }
 }
 
-const worker = new RSSWorker();
-worker.run();
+export { RSSWorker };
