@@ -4,6 +4,7 @@ import { stockDataService } from '../services/stockDataService'
 import { politicianTradingService } from '../services/politicianTradingService'
 import { congressTrackerService } from '../services/congressTrackerService'
 import FearGreedPanel from './FearGreedPanel'
+import CortisolGauge from './CortisolGauge'
 import type { PoliticianTrade } from '../services/politicianTradingService'
 import type { CongressTrade, SystemStatus } from '../services/congressTrackerService'
 
@@ -114,8 +115,8 @@ export default function OverviewTab() {
   return (
     <div style={{ 
       minHeight: 'calc(100vh - 64px)', 
-      background: '#060B14', 
-      color: '#E2E8F0',
+      background: '#e0e5ec', 
+      color: '#4a5568',
       padding: '32px',
       overflowY: 'auto'
     }}>
@@ -124,12 +125,12 @@ export default function OverviewTab() {
         <h1 style={{ 
           fontSize: 32, 
           fontWeight: 700, 
-          color: '#F1F5F9',
+          color: '#2d3748',
           marginBottom: 8
         }}>
           📊 Overview
         </h1>
-        <p style={{ fontSize: 14, color: '#64748B' }}>
+        <p style={{ fontSize: 14, color: '#718096', fontWeight: 500 }}>
           Real-time snapshot of all market intelligence data
         </p>
       </div>
@@ -143,10 +144,10 @@ export default function OverviewTab() {
         
         {/* Market Indices Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          padding: 24
+          background: '#ffffff',
+          borderRadius: 20,
+          padding: 24,
+          boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -158,32 +159,34 @@ export default function OverviewTab() {
               <h2 style={{ 
                 fontSize: 18, 
                 fontWeight: 600, 
-                color: '#F1F5F9',
+                color: '#0f172a',
                 marginBottom: 4
               }}>
                 📈 Market Indices
               </h2>
-              <p style={{ fontSize: 12, color: '#64748B' }}>
+              <p style={{ fontSize: 12, color: '#4a5568', fontWeight: 500 }}>
                 Live market performance
               </p>
             </div>
             <button
               onClick={() => navigate('/stock-market')}
               style={{
-                padding: '8px 16px',
-                background: 'rgba(59,130,246,0.1)',
-                border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: 6,
-                color: '#60A5FA',
+                padding: '10px 18px',
+                background: '#e0e5ec',
+                border: 'none',
+                borderRadius: 12,
+                color: '#667eea',
                 fontSize: 12,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.3s',
+                fontWeight: 600,
+                boxShadow: '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.2)'
+                e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
+                e.currentTarget.style.boxShadow = '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
             >
               View All →
@@ -191,7 +194,7 @@ export default function OverviewTab() {
           </div>
 
           {loadingMarket ? (
-            <div style={{ textAlign: 'center', padding: 20, color: '#64748B' }}>
+            <div style={{ textAlign: 'center', padding: 20, color: '#4a5568' }}>
               Loading...
             </div>
           ) : (
@@ -204,16 +207,16 @@ export default function OverviewTab() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: 12,
-                    background: 'rgba(255,255,255,0.02)',
+                    background: '#f8fafc',
                     borderRadius: 8,
-                    border: '1px solid rgba(255,255,255,0.05)'
+                    boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#F1F5F9' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
                       {index.name}
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: '#4a5568', marginTop: 2 }}>
                       {index.symbol}
                     </div>
                   </div>
@@ -221,7 +224,7 @@ export default function OverviewTab() {
                     <div style={{ 
                       fontSize: 16, 
                       fontWeight: 700, 
-                      color: '#F1F5F9',
+                      color: '#1a202c',
                       fontFamily: "'DM Mono', monospace"
                     }}>
                       {index.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
@@ -229,7 +232,8 @@ export default function OverviewTab() {
                     <div style={{ 
                       fontSize: 12, 
                       color: index.change >= 0 ? '#10B981' : '#EF4444',
-                      marginTop: 2
+                      marginTop: 2,
+                      fontWeight: 600
                     }}>
                       {index.change >= 0 ? '▲' : '▼'} {Math.abs(index.changePercent).toFixed(2)}%
                     </div>
@@ -243,12 +247,15 @@ export default function OverviewTab() {
         {/* Fear & Greed Index Card */}
         <FearGreedPanel />
 
+        {/* Cortisol Gauge Card */}
+        <CortisolGauge />
+
         {/* Politician Trading Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          padding: 24
+          background: '#ffffff',
+          borderRadius: 20,
+          padding: 24,
+          boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -260,32 +267,34 @@ export default function OverviewTab() {
               <h2 style={{ 
                 fontSize: 18, 
                 fontWeight: 600, 
-                color: '#F1F5F9',
+                color: '#0f172a',
                 marginBottom: 4
               }}>
                 💼 Politician Trading
               </h2>
-              <p style={{ fontSize: 12, color: '#64748B' }}>
+              <p style={{ fontSize: 12, color: '#4a5568', fontWeight: 500 }}>
                 Recent congressional trades
               </p>
             </div>
             <button
               onClick={() => navigate('/politician-trading')}
               style={{
-                padding: '8px 16px',
-                background: 'rgba(59,130,246,0.1)',
-                border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: 6,
-                color: '#60A5FA',
+                padding: '10px 18px',
+                background: '#e0e5ec',
+                border: 'none',
+                borderRadius: 12,
+                color: '#667eea',
                 fontSize: 12,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.3s',
+                fontWeight: 600,
+                boxShadow: '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.2)'
+                e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
+                e.currentTarget.style.boxShadow = '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
             >
               View All →
@@ -293,7 +302,7 @@ export default function OverviewTab() {
           </div>
 
           {loadingTrades ? (
-            <div style={{ textAlign: 'center', padding: 20, color: '#64748B' }}>
+            <div style={{ textAlign: 'center', padding: 20, color: '#4a5568' }}>
               Loading...
             </div>
           ) : (
@@ -303,9 +312,9 @@ export default function OverviewTab() {
                   key={idx}
                   style={{
                     padding: 10,
-                    background: 'rgba(255,255,255,0.02)',
-                    borderRadius: 6,
-                    border: '1px solid rgba(255,255,255,0.05)'
+                    background: '#f8fafc',
+                    borderRadius: 8,
+                    boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                   }}
                 >
                   <div style={{ 
@@ -313,25 +322,26 @@ export default function OverviewTab() {
                     justifyContent: 'space-between',
                     marginBottom: 4
                   }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#F1F5F9' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>
                       {trade.ticker || 'N/A'}
                     </div>
                     <div style={{ 
                       fontSize: 11,
                       padding: '2px 6px',
                       borderRadius: 4,
-                      background: trade.type === 'purchase' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                      color: trade.type === 'purchase' ? '#10B981' : '#EF4444'
+                      background: trade.type === 'purchase' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                      color: trade.type === 'purchase' ? '#059669' : '#dc2626',
+                      fontWeight: 600
                     }}>
                       {trade.type}
                     </div>
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748B' }}>
+                  <div style={{ fontSize: 11, color: '#4a5568' }}>
                     {trade.representative}
                   </div>
                   <div style={{ 
                     fontSize: 10, 
-                    color: '#475569',
+                    color: '#64748b',
                     marginTop: 4,
                     fontFamily: "'DM Mono', monospace"
                   }}>
@@ -345,10 +355,10 @@ export default function OverviewTab() {
 
         {/* Congress Tracker Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          padding: 24
+          background: '#ffffff',
+          borderRadius: 20,
+          padding: 24,
+          boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -360,32 +370,34 @@ export default function OverviewTab() {
               <h2 style={{ 
                 fontSize: 18, 
                 fontWeight: 600, 
-                color: '#F1F5F9',
+                color: '#0f172a',
                 marginBottom: 4
               }}>
                 🗳️ Congress Tracker
               </h2>
-              <p style={{ fontSize: 12, color: '#64748B' }}>
+              <p style={{ fontSize: 12, color: '#4a5568', fontWeight: 500 }}>
                 Automated filing monitor
               </p>
             </div>
             <button
               onClick={() => navigate('/congress-tracker')}
               style={{
-                padding: '8px 16px',
-                background: 'rgba(59,130,246,0.1)',
-                border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: 6,
-                color: '#60A5FA',
+                padding: '10px 18px',
+                background: '#e0e5ec',
+                border: 'none',
+                borderRadius: 12,
+                color: '#667eea',
                 fontSize: 12,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.3s',
+                fontWeight: 600,
+                boxShadow: '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.2)'
+                e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
+                e.currentTarget.style.boxShadow = '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
             >
               View All →
@@ -393,7 +405,7 @@ export default function OverviewTab() {
           </div>
 
           {loadingCongress ? (
-            <div style={{ textAlign: 'center', padding: 20, color: '#64748B' }}>
+            <div style={{ textAlign: 'center', padding: 20, color: '#4a5568' }}>
               Loading...
             </div>
           ) : (
@@ -407,37 +419,39 @@ export default function OverviewTab() {
                 }}>
                   <div style={{ 
                     padding: 12,
-                    background: 'rgba(255,255,255,0.02)',
+                    background: '#f8fafc',
                     borderRadius: 8,
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                   }}>
                     <div style={{ 
                       fontSize: 24, 
                       fontWeight: 700, 
-                      color: '#F1F5F9',
+                      color: '#0f172a',
                       fontFamily: "'DM Mono', monospace"
                     }}>
                       {congressStatus.totalTrades}
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: '#4a5568', marginTop: 4, fontWeight: 500 }}>
                       Total Trades
                     </div>
                   </div>
                   <div style={{ 
                     padding: 12,
-                    background: 'rgba(255,255,255,0.02)',
+                    background: '#f8fafc',
                     borderRadius: 8,
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                   }}>
                     <div style={{ 
                       fontSize: 24, 
                       fontWeight: 700, 
-                      color: congressStatus.unreadAlerts > 0 ? '#F59E0B' : '#F1F5F9',
+                      color: congressStatus.unreadAlerts > 0 ? '#ea580c' : '#0f172a',
                       fontFamily: "'DM Mono', monospace"
                     }}>
                       {congressStatus.unreadAlerts}
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: '#4a5568', marginTop: 4, fontWeight: 500 }}>
                       Unread Alerts
                     </div>
                   </div>
@@ -450,9 +464,9 @@ export default function OverviewTab() {
                     key={trade.id}
                     style={{
                       padding: 10,
-                      background: 'rgba(255,255,255,0.02)',
-                      borderRadius: 6,
-                      border: '1px solid rgba(255,255,255,0.05)'
+                      background: '#f8fafc',
+                      borderRadius: 8,
+                      boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                     }}
                   >
                     <div style={{ 
@@ -460,7 +474,7 @@ export default function OverviewTab() {
                       justifyContent: 'space-between',
                       marginBottom: 4
                     }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#F1F5F9' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>
                         {trade.ticker}
                       </div>
                       <div style={{ 
@@ -468,21 +482,22 @@ export default function OverviewTab() {
                         padding: '2px 6px',
                         borderRadius: 4,
                         background: trade.action.toLowerCase().includes('purchase') 
-                          ? 'rgba(16,185,129,0.1)' 
-                          : 'rgba(239,68,68,0.1)',
+                          ? 'rgba(16,185,129,0.15)' 
+                          : 'rgba(239,68,68,0.15)',
                         color: trade.action.toLowerCase().includes('purchase') 
-                          ? '#10B981' 
-                          : '#EF4444'
+                          ? '#059669' 
+                          : '#dc2626',
+                        fontWeight: 600
                       }}>
                         {trade.action}
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748B' }}>
+                    <div style={{ fontSize: 11, color: '#4a5568' }}>
                       {trade.full_name} ({trade.party})
                     </div>
                     <div style={{ 
                       fontSize: 10, 
-                      color: '#475569',
+                      color: '#64748b',
                       marginTop: 4,
                       fontFamily: "'DM Mono', monospace"
                     }}>
@@ -497,10 +512,10 @@ export default function OverviewTab() {
 
         {/* Sectorial Analysis Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          padding: 24
+          background: '#ffffff',
+          borderRadius: 20,
+          padding: 24,
+          boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -512,32 +527,34 @@ export default function OverviewTab() {
               <h2 style={{ 
                 fontSize: 18, 
                 fontWeight: 600, 
-                color: '#F1F5F9',
+                color: '#0f172a',
                 marginBottom: 4
               }}>
                 📊 Sectorial Analysis
               </h2>
-              <p style={{ fontSize: 12, color: '#64748B' }}>
+              <p style={{ fontSize: 12, color: '#4a5568', fontWeight: 500 }}>
                 11 economic sectors
               </p>
             </div>
             <button
               onClick={() => navigate('/')}
               style={{
-                padding: '8px 16px',
-                background: 'rgba(59,130,246,0.1)',
-                border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: 6,
-                color: '#60A5FA',
+                padding: '10px 18px',
+                background: '#e0e5ec',
+                border: 'none',
+                borderRadius: 12,
+                color: '#667eea',
                 fontSize: 12,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.3s',
+                fontWeight: 600,
+                boxShadow: '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.2)'
+                e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
+                e.currentTarget.style.boxShadow = '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               }}
             >
               View All →
@@ -565,120 +582,26 @@ export default function OverviewTab() {
                 style={{
                   padding: 12,
                   background: `${sector.color}15`,
-                  border: `1px solid ${sector.color}30`,
                   borderRadius: 8,
                   textAlign: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  boxShadow: '2px 2px 4px rgba(163, 177, 198, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.5)'
                 }}
                 onClick={() => navigate('/')}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `${sector.color}25`
+                  e.currentTarget.style.boxShadow = 'inset 2px 2px 4px rgba(163, 177, 198, 0.3), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = `${sector.color}15`
+                  e.currentTarget.style.boxShadow = '2px 2px 4px rgba(163, 177, 198, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.5)'
                 }}
               >
                 <div style={{ fontSize: 20, marginBottom: 4 }}>{sector.icon}</div>
-                <div style={{ fontSize: 10, color: sector.color, fontWeight: 500 }}>
+                <div style={{ fontSize: 10, color: sector.color, fontWeight: 600 }}>
                   {sector.label}
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* System Status Card */}
-        <div style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          padding: 24
-        }}>
-          <h2 style={{ 
-            fontSize: 18, 
-            fontWeight: 600, 
-            color: '#F1F5F9',
-            marginBottom: 20
-          }}>
-            ⚙️ System Status
-          </h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              padding: 10,
-              background: 'rgba(255,255,255,0.02)',
-              borderRadius: 6
-            }}>
-              <span style={{ fontSize: 13, color: '#94A3B8' }}>Market Data</span>
-              <span style={{ 
-                fontSize: 12, 
-                color: loadingMarket ? '#F59E0B' : '#10B981',
-                fontWeight: 600
-              }}>
-                {loadingMarket ? '● Loading' : '● Active'}
-              </span>
-            </div>
-
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              padding: 10,
-              background: 'rgba(255,255,255,0.02)',
-              borderRadius: 6
-            }}>
-              <span style={{ fontSize: 13, color: '#94A3B8' }}>Congress Tracker</span>
-              <span style={{ 
-                fontSize: 12, 
-                color: congressStatus?.isPolling ? '#10B981' : '#64748B',
-                fontWeight: 600
-              }}>
-                {congressStatus?.isPolling ? '● Active' : '● Stopped'}
-              </span>
-            </div>
-
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              padding: 10,
-              background: 'rgba(255,255,255,0.02)',
-              borderRadius: 6
-            }}>
-              <span style={{ fontSize: 13, color: '#94A3B8' }}>News Aggregation</span>
-              <span style={{ 
-                fontSize: 12, 
-                color: '#10B981',
-                fontWeight: 600
-              }}>
-                ● Active
-              </span>
-            </div>
-          </div>
-
-          <div style={{ 
-            marginTop: 20,
-            padding: 12,
-            background: 'rgba(59,130,246,0.1)',
-            border: '1px solid rgba(59,130,246,0.2)',
-            borderRadius: 8
-          }}>
-            <div style={{ fontSize: 11, color: '#60A5FA', marginBottom: 4 }}>
-              Last Updated
-            </div>
-            <div style={{ 
-              fontSize: 13, 
-              color: '#F1F5F9',
-              fontFamily: "'DM Mono', monospace"
-            }}>
-              {new Date().toLocaleString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
-            </div>
           </div>
         </div>
 

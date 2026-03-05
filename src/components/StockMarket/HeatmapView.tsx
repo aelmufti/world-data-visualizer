@@ -578,22 +578,22 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
     tooltip.style.top = `${event.pageY + 10}px`;
 
     tooltip.innerHTML = `
-      <div class="font-bold text-white mb-1">${data.symbol}</div>
-      <div class="text-gray-300 text-sm mb-2">${data.name}</div>
-      <div class="text-sm">
-        <div class="flex justify-between gap-4 mb-1">
-          <span class="text-gray-400">Change:</span>
-          <span class="${data.changePercent >= 0 ? 'text-green-500' : 'text-red-500'} font-semibold">
+      <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; font-size: 14px;">${data.symbol}</div>
+      <div style="color: #4a5568; font-size: 13px; margin-bottom: 8px;">${data.name}</div>
+      <div style="font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: #64748b;">Change:</span>
+          <span style="color: ${data.changePercent >= 0 ? '#10B981' : '#dc2626'}; font-weight: 600;">
             ${data.changePercent >= 0 ? '+' : ''}${data.changePercent.toFixed(2)}%
           </span>
         </div>
-        <div class="flex justify-between gap-4 mb-1">
-          <span class="text-gray-400">Market Cap:</span>
-          <span class="text-white">${formatMarketCap(data.marketCap)}</span>
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: #64748b;">Market Cap:</span>
+          <span style="color: #1a202c; font-weight: 500;">${formatMarketCap(data.marketCap)}</span>
         </div>
-        <div class="flex justify-between gap-4">
-          <span class="text-gray-400">Volume:</span>
-          <span class="text-white">${formatVolume(data.volume)}</span>
+        <div style="display: flex; justify-content: space-between; gap: 16px;">
+          <span style="color: #64748b;">Volume:</span>
+          <span style="color: #1a202c; font-weight: 500;">${formatVolume(data.volume)}</span>
         </div>
       </div>
     `;
@@ -622,10 +622,22 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
 
   if (loading) {
     return (
-      <div className="bg-[#0A1628] rounded-lg border border-gray-800 p-8">
-        <div className="flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-gray-400">Loading heatmap...</span>
+      <div style={{
+        background: '#ffffff',
+        borderRadius: 20,
+        padding: 32,
+        boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ 
+            width: 32, 
+            height: 32, 
+            border: '4px solid #667eea', 
+            borderTopColor: 'transparent', 
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <span style={{ marginLeft: 12, color: '#4a5568', fontSize: 14, fontWeight: 500 }}>Loading heatmap...</span>
         </div>
       </div>
     );
@@ -633,37 +645,58 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
 
   if (error) {
     return (
-      <div className="bg-[#0A1628] rounded-lg border border-gray-800 p-8">
-        <div className="text-center">
-          <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div style={{
+        background: '#ffffff',
+        borderRadius: 20,
+        padding: 32,
+        boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <svg style={{ width: 48, height: 48, margin: '0 auto 16px', color: '#dc2626' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-red-400">{error}</p>
+          <p style={{ color: '#dc2626', fontSize: 14, fontWeight: 600 }}>{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#0A1628] rounded-lg border border-gray-800 p-6">
+    <div style={{
+      background: '#ffffff',
+      borderRadius: 20,
+      padding: 24,
+      boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
+    }}>
       {/* Header with controls */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
-            <h2 className="text-xl font-bold text-white mb-1">Market Heatmap</h2>
-            <p className="text-sm text-gray-400">Size by market cap, color by performance</p>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>Market Heatmap</h2>
+            <p style={{ fontSize: 13, color: '#4a5568', fontWeight: 500 }}>Size by market cap, color by performance</p>
           </div>
 
           {/* Sector filter dropdown */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="sector-filter" className="text-sm text-gray-400">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <label htmlFor="sector-filter" style={{ fontSize: 13, color: '#4a5568', fontWeight: 500 }}>
               Filter:
             </label>
             <select
               id="sector-filter"
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
-              className="bg-[#060B14] text-white border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                background: '#e0e5ec',
+                color: '#1a202c',
+                border: 'none',
+                borderRadius: 10,
+                padding: '8px 12px',
+                fontSize: 13,
+                fontWeight: 500,
+                outline: 'none',
+                cursor: 'pointer',
+                boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
+              }}
             >
               {sectors.map(sector => (
                 <option key={sector} value={sector}>
@@ -675,17 +708,26 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
         </div>
 
         {/* Preset selector */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-sm text-gray-400">View:</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <label style={{ fontSize: 13, color: '#4a5568', fontWeight: 500 }}>View:</label>
           {Object.entries(PRESETS).map(([key, preset]) => (
             <button
               key={key}
               onClick={() => setSelectedPreset(key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                selectedPreset === key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-[#060B14] text-gray-300 hover:bg-gray-800'
-              }`}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                background: selectedPreset === key ? 'linear-gradient(145deg, #667eea, #764ba2)' : '#e0e5ec',
+                color: selectedPreset === key ? '#fff' : '#4a5568',
+                boxShadow: selectedPreset === key
+                  ? '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
+                  : 'inset 2px 2px 4px rgba(163, 177, 198, 0.3), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
+              }}
             >
               {preset.name}
             </button>
@@ -694,18 +736,18 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mb-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-600 rounded"></div>
-          <span className="text-gray-400">Losses</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, marginBottom: 16, fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 16, height: 16, background: '#dc2626', borderRadius: 4 }}></div>
+          <span style={{ color: '#4a5568', fontWeight: 500 }}>Losses</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-700 rounded"></div>
-          <span className="text-gray-400">Neutral</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 16, height: 16, background: '#64748b', borderRadius: 4 }}></div>
+          <span style={{ color: '#4a5568', fontWeight: 500 }}>Neutral</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-600 rounded"></div>
-          <span className="text-gray-400">Gains</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 16, height: 16, background: '#16a34a', borderRadius: 4 }}></div>
+          <span style={{ color: '#4a5568', fontWeight: 500 }}>Gains</span>
         </div>
       </div>
 
@@ -719,6 +761,26 @@ export const HeatmapView: React.FC<HeatmapViewProps> = ({ onStockSelect }) => {
         ref={tooltipRef}
         className="fixed z-50 bg-[#0A1628] border border-gray-700 rounded-lg p-3 shadow-xl pointer-events-none"
         style={{ display: 'none' }}
+      />
+      {/* Treemap container */}
+      <div style={{ position: 'relative', width: '100%', minHeight: '600px', background: '#f8fafc', borderRadius: 12, padding: 16, boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.5)' }}>
+        <svg ref={svgRef} style={{ width: '100%', height: '100%' }} />
+      </div>
+
+      {/* Tooltip */}
+      <div
+        ref={tooltipRef}
+        style={{
+          position: 'fixed',
+          zIndex: 50,
+          background: '#ffffff',
+          border: '2px solid rgba(163, 177, 198, 0.3)',
+          borderRadius: 12,
+          padding: 12,
+          boxShadow: '8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9)',
+          pointerEvents: 'none',
+          display: 'none'
+        }}
       />
     </div>
   );

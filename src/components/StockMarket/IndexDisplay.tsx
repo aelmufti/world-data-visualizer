@@ -54,15 +54,14 @@ export default function IndexDisplay({ indexes, loading, onIndexClick }: IndexDi
           <div
             key={i}
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 8,
+              background: '#f8fafc',
+              borderRadius: 12,
               padding: '16px 18px',
+              height: 120,
+              boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)',
               animation: 'pulse 2s ease-in-out infinite'
             }}
-          >
-            <div style={{ height: 60 }} />
-          </div>
+          />
         ))}
       </div>
     )
@@ -100,31 +99,29 @@ export default function IndexDisplay({ indexes, loading, onIndexClick }: IndexDi
             key={index.symbol}
             onClick={() => onIndexClick(index.symbol)}
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 8,
+              background: '#f8fafc',
+              borderRadius: 12,
               padding: '16px 18px',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              position: 'relative'
+              position: 'relative',
+              boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-              e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)'
+              e.currentTarget.style.boxShadow = '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
               e.currentTarget.style.transform = 'translateY(-2px)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
+              e.currentTarget.style.boxShadow = 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
               e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             {/* Index Name */}
             <div style={{
               fontSize: 12,
-              color: '#64748B',
+              color: '#4a5568',
               marginBottom: 8,
-              fontWeight: 500
+              fontWeight: 600
             }}>
               {index.name}
             </div>
@@ -133,7 +130,7 @@ export default function IndexDisplay({ indexes, loading, onIndexClick }: IndexDi
             <div style={{
               fontSize: 24,
               fontWeight: 700,
-              color: '#F1F5F9',
+              color: '#0f172a',
               fontFamily: "'DM Mono', monospace",
               marginBottom: 8
             }}>
@@ -178,7 +175,7 @@ export default function IndexDisplay({ indexes, loading, onIndexClick }: IndexDi
             {/* Last Update Time */}
             <div style={{
               fontSize: 10,
-              color: '#475569',
+              color: '#64748b',
               marginTop: 8,
               fontFamily: "'DM Mono', monospace"
             }}>

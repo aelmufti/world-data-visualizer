@@ -97,10 +97,10 @@ export default function PoliticianTradingTab() {
 
   return (
     <div style={{
-      fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-      background: '#080c10',
+      fontFamily: "'Poppins', sans-serif",
+      background: '#e0e5ec',
       minHeight: 'calc(100vh - 64px)',
-      color: '#e2e8f0',
+      color: '#4a5568',
       padding: 0,
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
@@ -111,54 +111,54 @@ export default function PoliticianTradingTab() {
           justifyContent: 'space-between',
           marginBottom: 32,
           paddingBottom: 24,
-          borderBottom: '1px solid #1e2a38',
+          borderBottom: '2px solid rgba(163, 177, 198, 0.2)',
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
               <div style={{
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                background: 'linear-gradient(145deg, #667eea, #764ba2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: 700,
                 color: '#fff',
-                fontFamily: 'Georgia, serif',
+                boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)',
               }}>
                 🏛️
               </div>
               <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Georgia, serif', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#2d3748', letterSpacing: '-0.02em' }}>
                   Congressional Trading
                 </div>
-                <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 12, color: '#718096', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500 }}>
                   U.S. House & Senate · Stock Disclosures
                 </div>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             {[
               { label: 'Total', value: recentTrades.length },
-              { label: 'Buys', value: totalBuys, color: '#22c55e' },
-              { label: 'Sells', value: totalSells, color: '#ef4444' },
+              { label: 'Buys', value: totalBuys, color: '#48bb78' },
+              { label: 'Sells', value: totalSells, color: '#f56565' },
             ].map(s => (
               <div key={s.label} style={{
-                background: '#0d1117',
-                border: '1px solid #1e2a38',
-                borderRadius: 6,
-                padding: '10px 20px',
+                background: '#e0e5ec',
+                borderRadius: 14,
+                padding: '12px 20px',
                 textAlign: 'center',
                 minWidth: 90,
+                boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)',
               }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: s.color || '#f1f5f9', fontFamily: 'Georgia, serif' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: s.color || '#2d3748' }}>
                   {s.value}
                 </div>
-                <div style={{ fontSize: 10, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
+                <div style={{ fontSize: 10, color: '#718096', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2, fontWeight: 600 }}>
                   {s.label}
                 </div>
               </div>

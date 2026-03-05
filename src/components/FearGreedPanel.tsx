@@ -89,13 +89,13 @@ export default function FearGreedPanel() {
   if (loading) {
     return (
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12,
+        background: '#ffffff',
+        borderRadius: 20,
         padding: 24,
-        textAlign: 'center'
+        textAlign: 'center',
+        boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
       }}>
-        <div style={{ color: '#64748B', fontSize: 14 }}>Loading Fear & Greed Index...</div>
+        <div style={{ color: '#4a5568', fontSize: 14 }}>Loading Fear & Greed Index...</div>
       </div>
     );
   }
@@ -103,34 +103,34 @@ export default function FearGreedPanel() {
   if (error || !data) {
     return (
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12,
+        background: '#ffffff',
+        borderRadius: 20,
         padding: 24,
-        textAlign: 'center'
+        textAlign: 'center',
+        boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
       }}>
-        <div style={{ color: '#EF4444', fontSize: 14 }}>Failed to load Fear & Greed Index</div>
+        <div style={{ color: '#EF4444', fontSize: 14, fontWeight: 600 }}>Failed to load Fear & Greed Index</div>
       </div>
     );
   }
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 12,
-      padding: 24
+      background: '#ffffff',
+      borderRadius: 20,
+      padding: 24,
+      boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
     }}>
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ 
           fontSize: 18, 
           fontWeight: 600, 
-          color: '#F1F5F9',
+          color: '#0f172a',
           marginBottom: 4
         }}>
           😨 Fear & Greed Index
         </h2>
-        <p style={{ fontSize: 12, color: '#64748B' }}>
+        <p style={{ fontSize: 12, color: '#4a5568', fontWeight: 500 }}>
           Market sentiment indicators
         </p>
       </div>
@@ -143,15 +143,15 @@ export default function FearGreedPanel() {
         {/* Stock Market Index */}
         {data.stock && (
           <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: 8,
-            padding: 16
+            background: '#f8fafc',
+            borderRadius: 12,
+            padding: 16,
+            boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
           }}>
             <div style={{ 
               fontSize: 13, 
               fontWeight: 600, 
-              color: '#F1F5F9',
+              color: '#0f172a',
               marginBottom: 12,
               textAlign: 'center'
             }}>
@@ -184,7 +184,7 @@ export default function FearGreedPanel() {
               {data.stock.vix && (
                 <div style={{ 
                   fontSize: 11, 
-                  color: '#64748B',
+                  color: '#4a5568',
                   marginTop: 8,
                   fontFamily: "'DM Mono', monospace"
                 }}>
@@ -193,7 +193,7 @@ export default function FearGreedPanel() {
               )}
               <div style={{ 
                 fontSize: 9, 
-                color: '#475569',
+                color: '#64748b',
                 marginTop: 4
               }}>
                 {data.stock.source}
@@ -205,15 +205,15 @@ export default function FearGreedPanel() {
         {/* Crypto Market Index */}
         {data.crypto && (
           <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: 8,
-            padding: 16
+            background: '#f8fafc',
+            borderRadius: 12,
+            padding: 16,
+            boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
           }}>
             <div style={{ 
               fontSize: 13, 
               fontWeight: 600, 
-              color: '#F1F5F9',
+              color: '#0f172a',
               marginBottom: 12,
               textAlign: 'center'
             }}>
@@ -245,7 +245,7 @@ export default function FearGreedPanel() {
               </div>
               <div style={{ 
                 fontSize: 9, 
-                color: '#475569',
+                color: '#64748b',
                 marginTop: 8
               }}>
                 {data.crypto.source}
@@ -259,17 +259,18 @@ export default function FearGreedPanel() {
       <div style={{ 
         marginTop: 20,
         padding: 12,
-        background: 'rgba(255,255,255,0.02)',
-        borderRadius: 8
+        background: '#f8fafc',
+        borderRadius: 8,
+        boxShadow: 'inset 2px 2px 4px rgba(163, 177, 198, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.5)'
       }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between',
           fontSize: 10,
-          color: '#64748B'
+          fontWeight: 600
         }}>
           <span style={{ color: '#EF4444' }}>0 Extreme Fear</span>
-          <span style={{ color: '#64748B' }}>50 Neutral</span>
+          <span style={{ color: '#4a5568' }}>50 Neutral</span>
           <span style={{ color: '#22C55E' }}>100 Extreme Greed</span>
         </div>
       </div>
@@ -277,7 +278,7 @@ export default function FearGreedPanel() {
       <div style={{ 
         marginTop: 12,
         fontSize: 10,
-        color: '#475569',
+        color: '#64748b',
         textAlign: 'center',
         fontFamily: "'DM Mono', monospace"
       }}>

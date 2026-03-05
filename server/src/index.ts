@@ -13,6 +13,7 @@ import companyRouter from './company-endpoint.js';
 import politicianTradingRouter from './politician-trading-endpoint.js';
 import congressRouter from './congress-tracker/endpoints.js';
 import fearGreedRouter from './fear-greed-endpoint.js';
+import cortisolRouter from './cortisol-endpoint.js';
 import { setupAISProxy } from './ais-proxy.js';
 import { StockWebSocketServer } from './stock-market/websocket-server.js';
 import { RSSWorker } from './rss-worker-duckdb.js';
@@ -47,6 +48,61 @@ app.get('/api/health', (req, res) => {
       congressTracker: congressPipeline ? 'running' : 'stopped'
     }
   });
+});
+
+// Backend status endpoint with detailed service information
+app.get('/api/status', async (req, res) => {
+  try {
+    const services = {
+      database: {
+        status: db ? 'operational' : 'down',
+        name: 'DuckDB',
+        icon: '🗄️'
+      },
+      yahooFinance: {
+        status: stockWsServer ? 'operational' : 'down',
+        name: 'Yahoo Finance',
+        icon: '📈'
+      },
+      newsWebSocket: {
+        status: newsWsServer ? 'operational' : 'down',
+        name: 'News Feed',
+        icon: '📰'
+      },
+      rssWorker: {
+        status: rssWorker ? 'operational' : 'down',
+        name: 'RSS Worker',
+        icon: '📡'
+      },
+      congressTracker: {
+        status: congressPipeline ? 'operational' : 'down',
+        name: 'Congress Tracker',
+        icon: '🗳️'
+      }
+    };
+
+    // Check if congress poller is running
+    const congressPollerStatus = congressPoller ? 'operational' : 'down';
+    
+    res.json({
+      overall: Object.values(services).every(s => s.status === 'operational') ? 'operational' : 'degraded',
+      timestamp: new Date().toISOString(),
+      services: {
+        ...services,
+        congressPoller: {
+          status: congressPollerStatus,
+          name: 'Congress Poller',
+          icon: '🔄'
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      overall: 'down',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Initialize database
@@ -120,6 +176,9 @@ app.use('/api/congress', congressRouter);
 
 // Routes de Fear & Greed Index
 app.use('/api/fear-greed', fearGreedRouter);
+
+// Cortisol Level endpoint
+app.use('/api/cortisol', cortisolRouter);
 
 // Database query endpoint (for development/debugging)
 app.post('/api/db/query', async (req, res) => {

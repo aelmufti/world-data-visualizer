@@ -202,42 +202,52 @@ export default function TopNewsPanel({ sector }: Props) {
   }
 
   return (
-    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
+    <div style={{ 
+      background: "#ffffff", 
+      borderRadius: "24px",
+      padding: 24, 
+      marginBottom: 24, 
+      boxShadow: "10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)"
+    }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, paddingBottom: 14, borderBottom: "2px solid rgba(163, 177, 198, 0.2)" }}>
         <div>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase" }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: "#718096", textTransform: "uppercase", fontWeight: 600 }}>
             🔥 Top 5 · {sectorLabel} · 48h
           </span>
           {lastUpdate && (
-            <div style={{ fontSize: 9, color: "#334155", marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: "#a0aec0", marginTop: 6, fontWeight: 500 }}>
               Mis à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ 
-            width: 8, 
-            height: 8, 
+            width: 10, 
+            height: 10, 
             borderRadius: '50%', 
-            background: connected ? '#10B981' : '#EF4444',
+            background: connected ? '#48bb78' : '#f56565',
+            boxShadow: connected ? '0 0 10px rgba(72, 187, 120, 0.6)' : '0 0 10px rgba(245, 101, 101, 0.6)',
             animation: connected ? 'pulse 2s ease-in-out infinite' : 'none'
           }} />
-          <span style={{ fontSize: 10, color: connected ? '#10B981' : '#EF4444', fontFamily: "'DM Mono', monospace" }}>
+          <span style={{ fontSize: 11, color: connected ? '#48bb78' : '#f56565', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
             {connected ? 'LIVE' : 'DÉCONNECTÉ'}
           </span>
           {!connected && (
             <button
               onClick={connectWebSocket}
               style={{ 
-                background: "rgba(255,255,255,0.05)", 
-                border: "1px solid rgba(255,255,255,0.1)", 
-                borderRadius: 6, 
-                padding: "4px 12px", 
-                color: "#94A3B8", 
+                background: "#e0e5ec",
+                borderRadius: "10px",
+                border: "none",
+                padding: "6px 12px", 
+                color: "#4a5568", 
                 fontSize: 11, 
                 cursor: "pointer", 
-                fontFamily: "'DM Mono', monospace" 
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 600,
+                boxShadow: "4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)",
+                transition: "all 0.3s"
               }}
             >
               Reconnecter

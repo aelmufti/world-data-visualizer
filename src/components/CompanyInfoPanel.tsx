@@ -91,13 +91,18 @@ export default function CompanyInfoPanel() {
   }
 
   return (
-    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
+    <div style={{ 
+      background: "#ffffff", 
+      borderRadius: "24px",
+      padding: 24, 
+      boxShadow: "10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)"
+    }}>
       {/* Search */}
       <form onSubmit={handleSearch} style={{ marginBottom: 20 }}>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase", marginBottom: 12 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: "#718096", textTransform: "uppercase", marginBottom: 14, fontWeight: 600, paddingBottom: 12, borderBottom: "2px solid rgba(163, 177, 198, 0.2)" }}>
           🔍 Recherche d'Entreprise
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
           <input
             type="text"
             value={searchQuery}
@@ -105,27 +110,33 @@ export default function CompanyInfoPanel() {
             placeholder="Ticker (ex: AAPL, TSLA, MSFT)"
             style={{
               flex: 1,
-              background: "rgba(0,0,0,0.3)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 8,
-              padding: "10px 12px",
-              color: "#E2E8F0",
-              fontSize: 14,
-              fontFamily: "'DM Mono', monospace"
+              background: "#e0e5ec",
+              border: "none",
+              borderRadius: "12px",
+              padding: "12px 16px",
+              color: "#2d3748",
+              fontSize: 13,
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 500,
+              boxShadow: "inset 4px 4px 8px rgba(163, 177, 198, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.5)",
+              outline: "none"
             }}
           />
           <button
             type="submit"
             disabled={loading || !searchQuery.trim()}
             style={{
-              background: loading ? "#475569" : "#3B82F6",
+              background: loading ? "#cbd5e0" : "linear-gradient(145deg, #667eea, #764ba2)",
               border: "none",
-              borderRadius: 8,
-              padding: "10px 20px",
-              color: "white",
-              fontSize: 14,
+              borderRadius: "12px",
+              padding: "12px 24px",
+              color: "#fff",
+              fontSize: 13,
               fontWeight: 600,
-              cursor: loading ? "wait" : "pointer"
+              cursor: loading ? "wait" : "pointer",
+              fontFamily: "'Poppins', sans-serif",
+              boxShadow: "6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)",
+              transition: "all 0.3s"
             }}
           >
             {loading ? "..." : "Rechercher"}

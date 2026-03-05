@@ -14,6 +14,7 @@ import { StockSearch } from './StockSearch'
 import { StockDetailView } from './StockDetailView'
 import { WatchlistPanel } from './WatchlistPanel'
 import { AlertPanel } from './AlertPanel'
+import FearGreedPanel from '../FearGreedPanel'
 
 export default function StockMarketTab() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -193,21 +194,22 @@ export default function StockMarketTab() {
   return (
     <div style={{
       minHeight: 'calc(100vh - 64px)',
-      background: '#060B14',
-      color: '#E2E8F0',
-      fontFamily: "'DM Sans', sans-serif",
+      background: '#e0e5ec',
+      color: '#4a5568',
+      fontFamily: "'Poppins', sans-serif",
       padding: '28px 32px'
     }}>
       {/* Error Boundary */}
       {error && (
         <div style={{
-          background: 'rgba(239,68,68,0.1)',
-          border: '1px solid rgba(239,68,68,0.3)',
-          borderRadius: 8,
+          background: 'linear-gradient(145deg, #fef2f2, #fee2e2)',
+          borderRadius: 12,
           padding: '12px 16px',
           marginBottom: 20,
-          color: '#EF4444',
-          fontSize: 14
+          color: '#dc2626',
+          fontSize: 14,
+          fontWeight: 500,
+          boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
         }}>
           {error}
         </div>
@@ -216,13 +218,14 @@ export default function StockMarketTab() {
       {/* Indexes Error */}
       {indexesError && !error && (
         <div style={{
-          background: 'rgba(245,158,11,0.1)',
-          border: '1px solid rgba(245,158,11,0.3)',
-          borderRadius: 8,
+          background: 'linear-gradient(145deg, #fffbeb, #fef3c7)',
+          borderRadius: 12,
           padding: '12px 16px',
           marginBottom: 20,
-          color: '#F59E0B',
-          fontSize: 14
+          color: '#d97706',
+          fontSize: 14,
+          fontWeight: 500,
+          boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
         }}>
           ⚠️ Impossible de charger les indices en temps réel. Vérifiez que le backend est démarré.
         </div>
@@ -231,19 +234,19 @@ export default function StockMarketTab() {
       {/* Backend Unavailable Warning */}
       {!backendAvailable && (
         <div style={{
-          background: 'rgba(245,158,11,0.1)',
-          border: '1px solid rgba(245,158,11,0.3)',
-          borderRadius: 8,
+          background: '#e0e5ec',
+          borderRadius: 16,
           padding: '16px 20px',
           marginBottom: 20,
           display: 'flex',
           alignItems: 'flex-start',
-          gap: 12
+          gap: 12,
+          boxShadow: '8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.5)'
         }}>
           <div style={{ fontSize: 24 }}>⚠️</div>
           <div style={{ flex: 1 }}>
             <div style={{
-              color: '#F59E0B',
+              color: '#d97706',
               fontSize: 15,
               fontWeight: 600,
               marginBottom: 6
@@ -251,7 +254,7 @@ export default function StockMarketTab() {
               Backend non disponible
             </div>
             <div style={{
-              color: '#FCD34D',
+              color: '#78716c',
               fontSize: 13,
               lineHeight: 1.5,
               marginBottom: 8
@@ -260,16 +263,16 @@ export default function StockMarketTab() {
               recherche d'actions, données en temps réel, graphiques.
             </div>
             <div style={{
-              background: 'rgba(0,0,0,0.3)',
-              border: '1px solid rgba(245,158,11,0.2)',
-              borderRadius: 6,
+              background: '#e0e5ec',
+              borderRadius: 8,
               padding: '8px 12px',
-              fontFamily: "'DM Mono', monospace",
+              fontFamily: "'Space Mono', monospace",
               fontSize: 12,
-              color: '#FCD34D'
+              color: '#57534e',
+              boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
             }}>
               <div style={{ marginBottom: 4 }}>💡 Pour démarrer le backend :</div>
-              <code style={{ color: '#FDE68A' }}>cd server && npm run dev</code>
+              <code style={{ color: '#78716c' }}>cd server && npm run dev</code>
             </div>
           </div>
         </div>
@@ -284,31 +287,32 @@ export default function StockMarketTab() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            background: 'rgba(59,130,246,0.15)',
-            border: '1px solid rgba(59,130,246,0.3)',
+            width: 56,
+            height: 56,
+            borderRadius: 16,
+            background: 'linear-gradient(145deg, #667eea, #764ba2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 22
+            fontSize: 26,
+            boxShadow: '8px 8px 16px rgba(163, 177, 198, 0.5), -8px -8px 16px rgba(255, 255, 255, 0.8)'
           }}>
             📈
           </div>
           <div>
             <h1 style={{
-              fontSize: 26,
+              fontSize: 28,
               fontWeight: 700,
-              color: '#F1F5F9',
-              lineHeight: 1
+              color: '#2d3748',
+              lineHeight: 1.2
             }}>
               Marché Boursier
             </h1>
             <p style={{
               fontSize: 13,
-              color: '#475569',
-              marginTop: 4
+              color: '#718096',
+              marginTop: 4,
+              fontWeight: 500
             }}>
               Données en temps réel · {state.watchlist.length} actions suivies
             </p>
@@ -319,26 +323,29 @@ export default function StockMarketTab() {
         <div style={{
           display: 'flex',
           gap: 8,
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 8,
-          padding: 4
+          background: '#e0e5ec',
+          borderRadius: 12,
+          padding: 6,
+          boxShadow: 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
         }}>
           {(['overview', 'heatmap', 'comparison'] as const).map(view => (
             <button
               key={view}
               onClick={() => handleViewChange(view)}
               style={{
-                padding: '8px 16px',
-                background: state.activeView === view ? 'rgba(59,130,246,0.15)' : 'transparent',
-                border: state.activeView === view ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-                borderRadius: 6,
-                color: state.activeView === view ? '#60A5FA' : '#94A3B8',
+                padding: '10px 18px',
+                background: state.activeView === view ? 'linear-gradient(145deg, #667eea, #764ba2)' : '#e0e5ec',
+                border: 'none',
+                borderRadius: 10,
+                color: state.activeView === view ? '#fff' : '#4a5568',
                 fontSize: 13,
-                fontWeight: state.activeView === view ? 600 : 400,
+                fontWeight: state.activeView === view ? 600 : 500,
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                textTransform: 'capitalize'
+                transition: 'all 0.3s',
+                textTransform: 'capitalize',
+                boxShadow: state.activeView === view 
+                  ? '4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)'
+                  : 'none'
               }}
             >
               {view === 'overview' ? 'Vue d\'ensemble' : 
@@ -373,18 +380,21 @@ export default function StockMarketTab() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {/* Indexes */}
               <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 12,
-                padding: 24
+                background: '#ffffff',
+                borderRadius: 20,
+                padding: 24,
+                boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'
               }}>
                 <div style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 11,
-                  letterSpacing: 2,
-                  color: '#64748B',
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 13,
+                  letterSpacing: 1.5,
+                  color: '#718096',
                   textTransform: 'uppercase',
-                  marginBottom: 20
+                  marginBottom: 20,
+                  fontWeight: 600,
+                  paddingBottom: 12,
+                  borderBottom: '2px solid rgba(163, 177, 198, 0.2)'
                 }}>
                   Indices Majeurs
                 </div>
@@ -394,6 +404,9 @@ export default function StockMarketTab() {
                   onIndexClick={handleSymbolSelect}
                 />
               </div>
+
+              {/* Fear & Greed Index */}
+              <FearGreedPanel />
             </div>
 
             {/* Sidebar */}
@@ -430,25 +443,24 @@ export default function StockMarketTab() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '10px 16px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 8,
-                color: '#94A3B8',
+                padding: '12px 18px',
+                background: '#e0e5ec',
+                border: 'none',
+                borderRadius: 12,
+                color: '#4a5568',
                 fontSize: 14,
                 fontWeight: 500,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.3s',
+                boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
-                e.currentTarget.style.color = '#60A5FA';
+                e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)';
+                e.currentTarget.style.color = '#667eea';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                e.currentTarget.style.color = '#94A3B8';
+                e.currentTarget.style.boxShadow = '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.color = '#4a5568';
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -500,25 +512,24 @@ export default function StockMarketTab() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '10px 16px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 8,
-                  color: '#94A3B8',
+                  padding: '12px 18px',
+                  background: '#e0e5ec',
+                  border: 'none',
+                  borderRadius: 12,
+                  color: '#4a5568',
                   fontSize: 14,
                   fontWeight: 500,
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.3s',
+                  boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
-                  e.currentTarget.style.color = '#60A5FA';
+                  e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)';
+                  e.currentTarget.style.color = '#667eea';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                  e.currentTarget.style.color = '#94A3B8';
+                  e.currentTarget.style.boxShadow = '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)';
+                  e.currentTarget.style.color = '#4a5568';
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

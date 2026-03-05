@@ -39,7 +39,8 @@ router.get('/crypto', async (req, res) => {
         source: 'Alternative.me'
       };
 
-      cache.set('crypto-fear-greed', result);
+      // Cache for 1 hour to reduce API calls
+      cache.set('crypto-fear-greed', result, 3600);
       return res.json(result);
     }
 
@@ -65,44 +66,73 @@ router.get('/stock', async (req, res) => {
     // For now, we'll use a mock calculation based on VIX
     // In production, you'd want to implement proper calculation or use a paid API
     
-    const vixResponse = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d`);
-    const vixData = await vixResponse.json();
-    
-    if (vixData.chart?.result?.[0]?.meta?.regularMarketPrice) {
-      const vix = vixData.chart.result[0].meta.regularMarketPrice;
+    try {
+      const vixResponse = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
       
-      // Simple approximation: VIX inversely correlates with Fear & Greed
-      // VIX < 12 = Extreme Greed (80-100)
-      // VIX 12-20 = Greed/Neutral (50-80)
-      // VIX 20-30 = Fear (25-50)
-      // VIX > 30 = Extreme Fear (0-25)
-      
-      let value: number;
-      if (vix < 12) {
-        value = 80 + (12 - vix) * 2;
-      } else if (vix < 20) {
-        value = 50 + (20 - vix) * 3.75;
-      } else if (vix < 30) {
-        value = 25 + (30 - vix) * 2.5;
-      } else {
-        value = Math.max(0, 25 - (vix - 30) * 1.5);
+      if (!vixResponse.ok) {
+        throw new Error(`Yahoo Finance returned ${vixResponse.status}`);
       }
       
-      value = Math.round(Math.max(0, Math.min(100, value)));
-      const classification = getClassification(value);
+      const vixData = await vixResponse.json();
+      
+      if (vixData.chart?.result?.[0]?.meta?.regularMarketPrice) {
+        const vix = vixData.chart.result[0].meta.regularMarketPrice;
+        
+        // Simple approximation: VIX inversely correlates with Fear & Greed
+        // VIX < 12 = Extreme Greed (80-100)
+        // VIX 12-20 = Greed/Neutral (50-80)
+        // VIX 20-30 = Fear (25-50)
+        // VIX > 30 = Extreme Fear (0-25)
+        
+        let value: number;
+        if (vix < 12) {
+          value = 80 + (12 - vix) * 2;
+        } else if (vix < 20) {
+          value = 50 + (20 - vix) * 3.75;
+        } else if (vix < 30) {
+          value = 25 + (30 - vix) * 2.5;
+        } else {
+          value = Math.max(0, 25 - (vix - 30) * 1.5);
+        }
+        
+        value = Math.round(Math.max(0, Math.min(100, value)));
+        const classification = getClassification(value);
 
-      const result = {
-        value,
-        classification: classification.label,
-        color: classification.color,
+        const result = {
+          value,
+          classification: classification.label,
+          color: classification.color,
+          timestamp: new Date().toISOString(),
+          vix: Math.round(vix * 100) / 100,
+          source: 'Calculated from VIX',
+          note: 'Approximation based on VIX volatility index'
+        };
+
+        // Cache for longer (2 hours) to avoid rate limiting
+        cache.set('stock-fear-greed', result, 7200);
+        return res.json(result);
+      }
+    } catch (fetchError: any) {
+      console.warn('Failed to fetch VIX data:', fetchError.message);
+      
+      // Return a fallback neutral value when API fails
+      const fallbackResult = {
+        value: 50,
+        classification: 'Neutral',
+        color: '#64748B',
         timestamp: new Date().toISOString(),
-        vix: Math.round(vix * 100) / 100,
-        source: 'Calculated from VIX',
-        note: 'Approximation based on VIX volatility index'
+        vix: null,
+        source: 'Fallback (API unavailable)',
+        note: 'Using neutral value due to API rate limiting'
       };
-
-      cache.set('stock-fear-greed', result);
-      return res.json(result);
+      
+      // Cache fallback for 30 minutes
+      cache.set('stock-fear-greed', fallbackResult, 1800);
+      return res.json(fallbackResult);
     }
 
     throw new Error('Unable to calculate stock fear & greed index');

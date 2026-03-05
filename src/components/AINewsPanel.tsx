@@ -107,14 +107,20 @@ export default function AINewsPanel({ sector }: Props) {
   }
 
   return (
-    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+    <div style={{ 
+      background: "#ffffff", 
+      borderRadius: "24px",
+      padding: 24, 
+      marginBottom: 24, 
+      boxShadow: "10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)"
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, paddingBottom: 14, borderBottom: "2px solid rgba(163, 177, 198, 0.2)" }}>
         <div>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: 2, color: "#64748B", textTransform: "uppercase" }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: "#718096", textTransform: "uppercase", fontWeight: 600 }}>
             📰 Actualités · {sector.label}
           </span>
           {lastUpdate && (
-            <div style={{ fontSize: 9, color: "#334155", marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: "#a0aec0", marginTop: 6, fontWeight: 500 }}>
               Mis à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
@@ -123,14 +129,17 @@ export default function AINewsPanel({ sector }: Props) {
           onClick={fetchNews}
           disabled={loading}
           style={{ 
-            background: "rgba(255,255,255,0.05)", 
-            border: "1px solid rgba(255,255,255,0.1)", 
-            borderRadius: 6, 
-            padding: "4px 12px", 
-            color: loading ? "#475569" : "#94A3B8", 
+            background: "#e0e5ec",
+            borderRadius: "10px",
+            border: "none",
+            padding: "8px 14px", 
+            color: "#4a5568", 
             fontSize: 11, 
             cursor: loading ? "wait" : "pointer", 
-            fontFamily: "'DM Mono', monospace" 
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 600,
+            boxShadow: "4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8)",
+            transition: "all 0.3s"
           }}
         >
           {loading ? "..." : "↻ Actualiser"}

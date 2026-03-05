@@ -136,286 +136,319 @@ export default function CongressTrackerTab() {
 
   return (
     <div style={{
-      fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-      background: '#080c10',
-      minHeight: 'calc(100vh - 64px)',
-      color: '#e2e8f0',
-      padding: 0,
+      fontFamily: "'Poppins', sans-serif",
+      background: '#e0e5ec',
+      minHeight: '100vh',
+      color: '#4a5568',
+      padding: '28px 32px',
     }}>
       {/* Real-time notification */}
       {showNotification && latestTrade && (
         <div style={{
           position: 'fixed',
-          top: 80,
+          top: 20,
           right: 20,
-          background: '#0d1117',
-          border: '2px solid #22c55e',
-          borderRadius: 8,
+          background: '#e0e5ec',
+          borderRadius: 16,
           padding: '16px 20px',
           zIndex: 1000,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          boxShadow: '10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.5)',
           minWidth: 320,
-          animation: 'slideIn 0.3s ease-out',
+          animation: 'fadeIn 0.3s ease-out',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
             <span style={{ fontSize: 24 }}>🔔</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#22c55e', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#48bb78', letterSpacing: '0.05em' }}>
                 NEW TRADE DETECTED
               </div>
-              <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+              <div style={{ fontSize: 10, color: '#718096', marginTop: 2 }}>
                 Just now
               </div>
             </div>
           </div>
-          <div style={{ fontSize: 13, color: '#f1f5f9', marginBottom: 4 }}>
+          <div style={{ fontSize: 13, color: '#2d3748', marginBottom: 4 }}>
             <strong>{latestTrade.full_name}</strong> ({latestTrade.party}-{latestTrade.state})
           </div>
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>
-            {latestTrade.action} <strong style={{ color: '#60a5fa' }}>{latestTrade.ticker}</strong> · {latestTrade.amount_label}
+          <div style={{ fontSize: 12, color: '#4a5568' }}>
+            {latestTrade.action} <strong style={{ color: '#667eea' }}>{latestTrade.ticker}</strong> · {latestTrade.amount_label}
           </div>
         </div>
       )}
 
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px' }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          marginBottom: 32,
-          paddingBottom: 24,
-          borderBottom: '1px solid #1e2a38',
-        }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 32,
+        paddingBottom: 24,
+        borderBottom: '2px solid rgba(163, 177, 198, 0.2)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 56,
+            height: 56,
+            borderRadius: 16,
+            background: 'linear-gradient(145deg, #667eea, #764ba2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 26,
+            boxShadow: '8px 8px 16px rgba(163, 177, 198, 0.5), -8px -8px 16px rgba(255, 255, 255, 0.8)',
+          }}>
+            🏛️
+          </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 20,
-              }}>
-                🏛️
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: '#2d3748', lineHeight: 1.2 }}>
+              Congress Trade Tracker
+            </h1>
+            <p style={{ fontSize: 13, color: '#718096', marginTop: 4, fontWeight: 500 }}>
+              Real-time PTR Filings · House & Senate · Win Rate Analysis
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          {[
+            { label: 'Total', value: trades.length },
+            { label: 'Buys', value: totalBuys, color: '#48bb78' },
+            { label: 'Sells', value: totalSells, color: '#f56565' },
+            { label: 'Alerts', value: unreadAlerts, color: '#ed8936' },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: '#e0e5ec',
+              borderRadius: 16,
+              padding: '14px 20px',
+              textAlign: 'center',
+              minWidth: 90,
+              boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)',
+            }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: s.color || '#2d3748' }}>
+                {s.value}
               </div>
-              <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Georgia, serif', letterSpacing: '-0.02em' }}>
-                  Congress Trade Tracker
+              <div style={{ fontSize: 10, color: '#718096', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4, fontWeight: 600 }}>
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Politicians Leaderboard */}
+      <div style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 24,
+      }}>
+        <div style={{ 
+          fontFamily: "'DM Mono', monospace", 
+          fontSize: 11, 
+          letterSpacing: 2, 
+          color: '#64748B', 
+          textTransform: 'uppercase', 
+          marginBottom: 16 
+        }}>
+          🏆 Top Performers by Win Rate
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+          {politicians.filter(p => p.winRate !== null).slice(0, 9).map(pol => (
+            <div
+              key={pol.lastName}
+              onClick={() => loadPoliticianTrades(pol.lastName)}
+              style={{
+                background: selectedPolitician === pol.lastName ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${selectedPolitician === pol.lastName ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                borderRadius: 8,
+                padding: '14px 16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(59,130,246,0.1)';
+                e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
+              }}
+              onMouseLeave={(e) => {
+                if (selectedPolitician !== pol.lastName) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                } else {
+                  e.currentTarget.style.background = 'rgba(59,130,246,0.15)';
+                }
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#F1F5F9', marginBottom: 4 }}>
+                {pol.fullName}
+              </div>
+              <div style={{ fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+                {pol.party === 'D' ? '🔵 Democrat' : '🔴 Republican'} · {pol.state} · {pol.chamber === 'house' ? 'House' : 'Senate'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e' }}>
+                    {((pol.winRate || 0) * 100).toFixed(0)}%
+                  </div>
+                  <div style={{ fontSize: 9, color: '#475569', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Win Rate
+                  </div>
                 </div>
-                <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  Real-time PTR Filings · House & Senate · Win Rate Analysis
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#60A5FA' }}>
+                    {pol.resolvedTrades}/{pol.totalTrades}
+                  </div>
+                  <div style={{ fontSize: 9, color: '#475569', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Resolved
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[
-              { label: 'Total', value: trades.length },
-              { label: 'Buys', value: totalBuys, color: '#22c55e' },
-              { label: 'Sells', value: totalSells, color: '#ef4444' },
-              { label: 'Alerts', value: unreadAlerts, color: '#f59e0b' },
-            ].map(s => (
-              <div key={s.label} style={{
-                background: '#0d1117',
-                border: '1px solid #1e2a38',
-                borderRadius: 6,
-                padding: '10px 20px',
-                textAlign: 'center',
-                minWidth: 90,
-              }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: s.color || '#f1f5f9', fontFamily: 'Georgia, serif' }}>
-                  {s.value}
-                </div>
-                <div style={{ fontSize: 10, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
+        {selectedPolitician && (
+          <button
+            onClick={clearPoliticianFilter}
+            style={{
+              marginTop: 16,
+              background: 'rgba(59,130,246,0.15)',
+              border: '1px solid rgba(59,130,246,0.3)',
+              color: '#60A5FA',
+              fontSize: 11,
+              letterSpacing: '0.05em',
+              padding: '8px 16px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(59,130,246,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(59,130,246,0.15)';
+            }}
+          >
+            ← Show All Politicians
+          </button>
+        )}
+      </div>
 
-        {/* Politicians Leaderboard */}
-        <div style={{
-          background: '#0d1117',
-          border: '1px solid #1e2a38',
-          borderRadius: 8,
-          padding: 20,
-          marginBottom: 24,
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ 
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 10, 
+          color: '#64748B', 
+          letterSpacing: '0.1em', 
+          textTransform: 'uppercase', 
+          marginRight: 8 
         }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', marginBottom: 16, letterSpacing: '0.05em' }}>
-            🏆 TOP PERFORMERS BY WIN RATE
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {politicians.filter(p => p.winRate !== null).slice(0, 9).map(pol => (
-              <div
-                key={pol.lastName}
-                onClick={() => loadPoliticianTrades(pol.lastName)}
-                style={{
-                  background: selectedPolitician === pol.lastName ? '#1d4ed822' : '#080c10',
-                  border: `1px solid ${selectedPolitician === pol.lastName ? '#3b82f6' : '#1e2a38'}`,
-                  borderRadius: 6,
-                  padding: '14px 16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#3b82f6';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedPolitician !== pol.lastName) {
-                    e.currentTarget.style.borderColor = '#1e2a38';
-                  }
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', marginBottom: 4 }}>
-                  {pol.fullName}
-                </div>
-                <div style={{ fontSize: 10, color: '#64748b', marginBottom: 8, letterSpacing: '0.05em' }}>
-                  {pol.party === 'D' ? '🔵 Democrat' : '🔴 Republican'} · {pol.state} · {pol.chamber === 'house' ? 'House' : 'Senate'}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e', fontFamily: 'Georgia, serif' }}>
-                      {((pol.winRate || 0) * 100).toFixed(0)}%
-                    </div>
-                    <div style={{ fontSize: 9, color: '#475569', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                      Win Rate
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#60a5fa' }}>
-                      {pol.resolvedTrades}/{pol.totalTrades}
-                    </div>
-                    <div style={{ fontSize: 9, color: '#475569', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                      Resolved
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {selectedPolitician && (
-            <button
-              onClick={clearPoliticianFilter}
-              style={{
-                marginTop: 16,
-                background: '#1d4ed8',
-                border: 'none',
-                color: '#fff',
-                fontSize: 11,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                padding: '8px 16px',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: 600,
-              }}
-            >
-              ← Show All Politicians
-            </button>
-          )}
+          Action:
         </div>
+        {['All', 'Purchase', 'Sale', 'Sale (Partial)', 'Exchange'].map(f => (
+          <button
+            key={f}
+            onClick={() => setFilterAction(f)}
+            style={{
+              background: filterAction === f ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${filterAction === f ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              color: filterAction === f ? '#60A5FA' : '#94A3B8',
+              fontSize: 11,
+              padding: '6px 14px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontWeight: filterAction === f ? 600 : 400,
+              transition: 'all 0.2s',
+            }}
+          >
+            {f}
+          </button>
+        ))}
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: 8 }}>
-            Action:
-          </div>
-          {['All', 'Purchase', 'Sale', 'Sale (Partial)', 'Exchange'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilterAction(f)}
-              style={{
-                background: filterAction === f ? '#1d4ed8' : '#0d1117',
-                border: `1px solid ${filterAction === f ? '#3b82f6' : '#1e2a38'}`,
-                color: filterAction === f ? '#fff' : '#64748b',
-                fontSize: 11,
-                letterSpacing: '0.05em',
-                padding: '6px 14px',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: filterAction === f ? 600 : 400,
-              }}
-            >
-              {f}
-            </button>
-          ))}
+        <div style={{ width: 1, background: 'rgba(255,255,255,0.06)', height: 24, margin: '0 8px' }} />
 
-          <div style={{ width: 1, background: '#1e2a38', height: 24, margin: '0 8px' }} />
-
-          <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: 8 }}>
-            Chamber:
-          </div>
-          {['All', 'house', 'senate'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilterChamber(f)}
-              style={{
-                background: filterChamber === f ? '#1d4ed8' : '#0d1117',
-                border: `1px solid ${filterChamber === f ? '#3b82f6' : '#1e2a38'}`,
-                color: filterChamber === f ? '#fff' : '#64748b',
-                fontSize: 11,
-                letterSpacing: '0.05em',
-                padding: '6px 14px',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: filterChamber === f ? 600 : 400,
-                textTransform: 'capitalize',
-              }}
-            >
-              {f}
-            </button>
-          ))}
-
-          <div style={{ width: 1, background: '#1e2a38', height: 24, margin: '0 8px' }} />
-
-          <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: 8 }}>
-            Ticker:
-          </div>
-          {tickers.slice(0, 12).map(t => (
-            <button
-              key={t}
-              onClick={() => setFilterTicker(t)}
-              style={{
-                background: filterTicker === t ? (tickerColors[t] || '#334155') + '33' : '#0d1117',
-                border: `1px solid ${filterTicker === t ? (tickerColors[t] || '#60a5fa') : '#1e2a38'}`,
-                color: filterTicker === t ? (tickerColors[t] || '#60a5fa') : '#64748b',
-                fontSize: 11,
-                letterSpacing: '0.05em',
-                padding: '6px 12px',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: filterTicker === t ? 600 : 400,
-              }}
-            >
-              {t}
-            </button>
-          ))}
+        <div style={{ 
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 10, 
+          color: '#64748B', 
+          letterSpacing: '0.1em', 
+          textTransform: 'uppercase', 
+          marginRight: 8 
+        }}>
+          Chamber:
         </div>
+        {['All', 'house', 'senate'].map(f => (
+          <button
+            key={f}
+            onClick={() => setFilterChamber(f)}
+            style={{
+              background: filterChamber === f ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${filterChamber === f ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              color: filterChamber === f ? '#60A5FA' : '#94A3B8',
+              fontSize: 11,
+              padding: '6px 14px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontWeight: filterChamber === f ? 600 : 400,
+              textTransform: 'capitalize',
+              transition: 'all 0.2s',
+            }}
+          >
+            {f}
+          </button>
+        ))}
 
-        {/* Loading */}
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 60, color: '#64748b' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>⏳</div>
-            <div>Loading congressional trades...</div>
-          </div>
-        ) : (
-          /* Table */
-          <div style={{
-            background: '#0d1117',
-            border: '1px solid #1e2a38',
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ background: '#080c10', borderBottom: '1px solid #1e2a38' }}>
+        <div style={{ width: 1, background: 'rgba(255,255,255,0.06)', height: 24, margin: '0 8px' }} />
+
+        <div style={{ 
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 10, 
+          color: '#64748B', 
+          letterSpacing: '0.1em', 
+          textTransform: 'uppercase', 
+          marginRight: 8 
+        }}>
+          Ticker:
+        </div>
+        {tickers.slice(0, 12).map(t => (
+          <button
+            key={t}
+            onClick={() => setFilterTicker(t)}
+            style={{
+              background: filterTicker === t ? (tickerColors[t] ? `${tickerColors[t]}22` : 'rgba(59,130,246,0.15)') : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${filterTicker === t ? (tickerColors[t] ? `${tickerColors[t]}55` : 'rgba(59,130,246,0.3)') : 'rgba(255,255,255,0.06)'}`,
+              color: filterTicker === t ? (tickerColors[t] || '#60A5FA') : '#94A3B8',
+              fontSize: 11,
+              padding: '6px 12px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontWeight: filterTicker === t ? 600 : 400,
+              transition: 'all 0.2s',
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 60, color: '#64748B' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⏳</div>
+          <div>Loading congressional trades...</div>
+        </div>
+      ) : (
+        /* Table */
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   {[
                     { label: 'Ticker', field: 'ticker' as keyof CongressTrade },
                     { label: 'Politician', field: 'full_name' as keyof CongressTrade },
@@ -589,7 +622,6 @@ export default function CongressTrackerTab() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
