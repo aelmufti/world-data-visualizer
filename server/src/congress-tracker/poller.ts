@@ -25,6 +25,10 @@ export class CongressPoller {
     }
   }
 
+  isActive(): boolean {
+    return this.intervalId !== null;
+  }
+
   private async runPoll(): Promise<void> {
     try {
       const result = await congressPipeline.runPoll();

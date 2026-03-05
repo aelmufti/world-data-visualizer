@@ -12,6 +12,7 @@ import quoteRouter from './stock-market/quote-endpoint.js';
 import companyRouter from './company-endpoint.js';
 import politicianTradingRouter from './politician-trading-endpoint.js';
 import congressRouter from './congress-tracker/endpoints.js';
+import fearGreedRouter from './fear-greed-endpoint.js';
 import { setupAISProxy } from './ais-proxy.js';
 import { StockWebSocketServer } from './stock-market/websocket-server.js';
 import { RSSWorker } from './rss-worker-duckdb.js';
@@ -116,6 +117,9 @@ app.use('/api', politicianTradingRouter);
 
 // Routes de Congress tracker
 app.use('/api/congress', congressRouter);
+
+// Routes de Fear & Greed Index
+app.use('/api/fear-greed', fearGreedRouter);
 
 // Database query endpoint (for development/debugging)
 app.post('/api/db/query', async (req, res) => {

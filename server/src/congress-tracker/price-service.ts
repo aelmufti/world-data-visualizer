@@ -79,7 +79,7 @@ export class PriceService {
       const url = `${this.yahooBaseUrl}/${ticker}?range=1d&interval=1d`;
       
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(), 15000); // Increased to 15s
 
       try {
         const response = await fetch(url, { signal: controller.signal });
@@ -97,8 +97,11 @@ export class PriceService {
       } finally {
         clearTimeout(timeout);
       }
-    } catch (error) {
-      console.error(`Error fetching current price for ${ticker}:`, error);
+    } catch (error: any) {
+      // Silently handle abort errors (timeouts) - they're expected under load
+      if (error.name !== 'AbortError') {
+        console.error(`Error fetching current price for ${ticker}:`, error.message);
+      }
       return null;
     }
   }

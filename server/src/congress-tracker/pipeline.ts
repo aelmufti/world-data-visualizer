@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { congressDb, Trade } from './database.js';
 import { pdfParser } from './pdf-parser.js';
 import { houseScraper, senateScraper } from './scrapers.js';
-import { TRACKED_POLITICIANS, Politician } from './politicians.js';
+import { CongressApiService, Politician } from './congress-api-service.js';
 
 export interface PipelineResult {
   success: boolean;
@@ -16,9 +16,34 @@ export interface PipelineResult {
 export class CongressPipeline extends EventEmitter {
   private isRunning = false;
   private lastPollTime: Date | null = null;
+  private congressApi: CongressApiService | null = null;
 
   async initialize(): Promise<void> {
     await congressDb.initTables();
+    
+    // Initialize Congress API service if API key is available
+    const apiKey = process.env.CONGRESS_API_KEY;
+    if (apiKey) {
+      this.congressApi = new CongressApiService(apiKey);
+      
+      // Check if we need to refresh politicians data (non-blocking)
+      try {
+        const shouldRefresh = await this.congressApi.shouldRefresh();
+        if (shouldRefresh) {
+          console.log('🔄 Refreshing politicians data from Congress.gov API...');
+          await this.congressApi.syncPoliticiansToDatabase();
+        }
+      } catch (error: any) {
+        console.error('⚠️  Failed to refresh politicians from API:', error.message);
+        console.log('💡 Server will continue with existing database data');
+        console.log('💡 To manually sync: cd server && npx tsx sync-politicians.ts');
+      }
+    } else {
+      console.warn('⚠️  CONGRESS_API_KEY not set. Politicians data will not be refreshed.');
+      console.log('💡 Get a free API key at: https://api.congress.gov/sign-up/');
+      console.log('💡 Add to server/.env: CONGRESS_API_KEY=your_key_here');
+    }
+    
     console.log('✅ Congress tracker pipeline initialized');
   }
 
@@ -43,6 +68,20 @@ export class CongressPipeline extends EventEmitter {
     try {
       console.log('🔄 Starting Congress trade poll...');
 
+      // Refresh politicians data if needed (every 24 hours)
+      if (this.congressApi) {
+        try {
+          const shouldRefresh = await this.congressApi.shouldRefresh();
+          if (shouldRefresh) {
+            console.log('🔄 Refreshing politicians data (24h elapsed)...');
+            await this.congressApi.syncPoliticiansToDatabase();
+          }
+        } catch (error: any) {
+          console.error('⚠️  Failed to refresh politicians:', error.message);
+          warnings.push(`Politicians refresh failed: ${error.message}`);
+        }
+      }
+
       // Check if pdftotext is available
       const hasPdfToText = await pdfParser.checkPdfToText();
       if (!hasPdfToText) {
@@ -56,14 +95,44 @@ export class CongressPipeline extends EventEmitter {
         };
       }
 
+      // Get active politicians from database
+      const politicians = this.congressApi 
+        ? await this.congressApi.getActivePoliticians()
+        : [];
+
+      if (politicians.length === 0) {
+        console.warn('⚠️  No active politicians found in database.');
+        console.log('💡 To populate: Get API key from https://api.congress.gov/sign-up/');
+        console.log('💡 Add to server/.env: CONGRESS_API_KEY=your_key_here');
+        console.log('💡 Then run: cd server && npx tsx sync-politicians.ts');
+        return {
+          success: false,
+          filings: 0,
+          trades: 0,
+          alerts: 0,
+          warnings: ['No politicians in database. Run sync-politicians.ts to populate.']
+        };
+      }
+
+      console.log(`📊 Tracking ${politicians.length} active politicians`);
+
       // Scan all politicians in parallel
       const years = [2025, 2026];
       const tasks: Promise<void>[] = [];
 
-      for (const politician of TRACKED_POLITICIANS) {
+      for (const politician of politicians) {
+        // Convert database politician to the format expected by scrapers
+        const politicianData = {
+          lastName: politician.last_name,
+          fullName: politician.full_name,
+          party: politician.party,
+          state: politician.state,
+          chamber: politician.chamber
+        };
+
         for (const year of years) {
           tasks.push(
-            this.processPolitician(politician, year)
+            this.processPolitician(politicianData, year)
               .then(result => {
                 totalFilings += result.filings;
                 totalTrades += result.trades;
@@ -73,7 +142,7 @@ export class CongressPipeline extends EventEmitter {
                 }
               })
               .catch(error => {
-                const msg = `${politician.lastName} ${year} failed: ${error.message}`;
+                const msg = `${politician.last_name} ${year} failed: ${error.message}`;
                 console.error(`❌ ${msg}`);
                 warnings.push(msg);
               })
@@ -101,7 +170,7 @@ export class CongressPipeline extends EventEmitter {
   }
 
   private async processPolitician(
-    politician: Politician,
+    politician: { lastName: string; fullName: string; party: string; state: string; chamber: 'house' | 'senate' },
     year: number
   ): Promise<{ filings: number; trades: number; alerts: number; warning?: string }> {
     try {
@@ -149,7 +218,7 @@ export class CongressPipeline extends EventEmitter {
   private async processFiling(
     filingId: string,
     pdfUrl: string,
-    politician: Politician,
+    politician: { lastName: string; fullName: string; party: string; state: string; chamber: 'house' | 'senate' },
     year: number
   ): Promise<{ isNew: boolean; trades: number; alerts: number }> {
     // Check if already processed
@@ -165,8 +234,8 @@ export class CongressPipeline extends EventEmitter {
       // Convert to text
       const text = await pdfParser.pdfToText(pdfBuffer);
 
-      // Parse trades
-      const parsedTrades = pdfParser.parseTrades(text);
+      // Parse trades (pass filing ID for fallback date)
+      const parsedTrades = pdfParser.parseTrades(text, filingId);
 
       // Insert filing
       await congressDb.insertFiling({

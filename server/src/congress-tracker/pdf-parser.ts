@@ -71,9 +71,18 @@ export class PDFParser {
     }
   }
 
-  parseTrades(text: string): ParsedTrade[] {
+  parseTrades(text: string, filingId?: string): ParsedTrade[] {
     const trades: ParsedTrade[] = [];
     const lines = text.split('\n');
+    
+    // Extract fallback date from filing ID (format: YYYYMMDD)
+    let fallbackDate = '';
+    if (filingId && /^\d{8}/.test(filingId)) {
+      const year = filingId.substring(0, 4);
+      const month = filingId.substring(4, 6);
+      const day = filingId.substring(6, 8);
+      fallbackDate = `${year}-${month}-${day}`;
+    }
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -176,6 +185,14 @@ export class PDFParser {
             notes = noteLine.substring(1).trim();
             break;
           }
+        }
+
+        // Use fallback date if transaction_date is missing
+        if (!transaction_date && fallbackDate) {
+          transaction_date = fallbackDate;
+        }
+        if (!notification_date && fallbackDate) {
+          notification_date = fallbackDate;
         }
 
         // Only add if we have minimum required data

@@ -26,6 +26,8 @@ export default function CongressTrackerTab() {
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
   const [latestTrade, setLatestTrade] = useState<CongressTrade | null>(null);
+  const [sortField, setSortField] = useState<keyof CongressTrade | null>('transaction_date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     loadData();
@@ -86,11 +88,47 @@ export default function CongressTrackerTab() {
 
   const tickers = ['All', ...new Set(trades.map(t => t.ticker).filter(Boolean))];
 
+  const handleSort = (field: keyof CongressTrade) => {
+    if (sortField === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New field, default to descending
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
   const filtered = trades.filter(trade => {
     const actionMatch = filterAction === 'All' || trade.action === filterAction;
     const tickerMatch = filterTicker === 'All' || trade.ticker === filterTicker;
     const chamberMatch = filterChamber === 'All' || trade.chamber === filterChamber;
     return actionMatch && tickerMatch && chamberMatch;
+  });
+
+  // Apply sorting
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+
+    // Handle null/undefined values
+    if (aVal === null || aVal === undefined) return 1;
+    if (bVal === null || bVal === undefined) return -1;
+
+    // Compare values
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return sortDirection === 'asc' 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
+      return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+
+    return 0;
   });
 
   const totalBuys = trades.filter(t => t.action === 'Purchase').length;
@@ -378,23 +416,55 @@ export default function CongressTrackerTab() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: '#080c10', borderBottom: '1px solid #1e2a38' }}>
-                  {['Ticker', 'Politician', 'Party', 'Action', 'Amount', 'Date', 'Price', 'Return', 'Result'].map(h => (
-                    <th key={h} style={{
-                      padding: '12px 16px',
-                      textAlign: 'left',
-                      fontSize: 10,
-                      letterSpacing: '0.12em',
-                      textTransform: 'uppercase',
-                      color: '#334155',
-                      fontWeight: 500,
-                    }}>
-                      {h}
+                  {[
+                    { label: 'Ticker', field: 'ticker' as keyof CongressTrade },
+                    { label: 'Politician', field: 'full_name' as keyof CongressTrade },
+                    { label: 'Party', field: 'party' as keyof CongressTrade },
+                    { label: 'Action', field: 'action' as keyof CongressTrade },
+                    { label: 'Amount', field: 'amount_label' as keyof CongressTrade },
+                    { label: 'Date', field: 'transaction_date' as keyof CongressTrade },
+                    { label: 'Price', field: 'priceAtTrade' as keyof CongressTrade },
+                    { label: 'Return', field: 'returnPct' as keyof CongressTrade },
+                    { label: 'Result', field: 'isWin' as keyof CongressTrade },
+                  ].map(h => (
+                    <th 
+                      key={h.label} 
+                      onClick={() => handleSort(h.field)}
+                      style={{
+                        padding: '12px 16px',
+                        textAlign: 'left',
+                        fontSize: 10,
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        color: sortField === h.field ? '#60a5fa' : '#334155',
+                        fontWeight: sortField === h.field ? 600 : 500,
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#60a5fa';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (sortField !== h.field) {
+                          e.currentTarget.style.color = '#334155';
+                        }
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {h.label}
+                        {sortField === h.field && (
+                          <span style={{ fontSize: 10 }}>
+                            {sortDirection === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.slice(0, 100).map((trade, i) => (
+                {sorted.slice(0, 100).map((trade, i) => (
                   <tr
                     key={trade.id}
                     onMouseEnter={() => setHoveredRow(i)}
@@ -511,7 +581,7 @@ export default function CongressTrackerTab() {
               alignItems: 'center',
             }}>
               <div>
-                {filtered.length} TRANSACTIONS · REAL-TIME PTR FILINGS · POWERED BY DUCKDB
+                {sorted.length} TRANSACTIONS · REAL-TIME PTR FILINGS · POWERED BY DUCKDB
               </div>
               <div style={{ color: '#22c55e' }}>
                 🟢 LIVE

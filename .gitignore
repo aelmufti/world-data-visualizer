@@ -36,6 +36,10 @@ ui-debug.log
 gcloud-credentials.json
 application_default_credentials.json
 
+# Test files with potential secrets
+test-ais-connection.js
+test-ais-connection.mjs
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

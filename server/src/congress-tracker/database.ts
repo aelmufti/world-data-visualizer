@@ -56,6 +56,20 @@ export class CongressDatabase {
     const db = getDatabase();
 
     await db.exec(`
+      CREATE TABLE IF NOT EXISTS politicians (
+        bioguide_id VARCHAR PRIMARY KEY,
+        last_name VARCHAR,
+        full_name VARCHAR,
+        party VARCHAR,
+        state VARCHAR,
+        chamber VARCHAR,
+        district VARCHAR,
+        is_active BOOLEAN DEFAULT true,
+        last_updated TIMESTAMP
+      );
+    `);
+
+    await db.exec(`
       CREATE TABLE IF NOT EXISTS filings (
         filing_id VARCHAR PRIMARY KEY,
         politician VARCHAR,

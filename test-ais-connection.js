@@ -1,7 +1,13 @@
 // Test de connexion AIS Stream
 const WebSocket = require('ws');
 
-const API_KEY = '6c13218b128aa83a7ac3d5a8f5ec4c9b30f269dd';
+const API_KEY = process.env.AIS_API_KEY || '';
+
+if (!API_KEY) {
+  console.error('❌ Error: AIS_API_KEY environment variable is not set');
+  console.log('💡 Usage: AIS_API_KEY=your_key_here node test-ais-connection.js');
+  process.exit(1);
+}
 
 console.log('🔍 Testing AIS Stream connection...');
 console.log('API Key:', API_KEY.substring(0, 10) + '...');

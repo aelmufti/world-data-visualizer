@@ -1,17 +1,24 @@
 // House and Senate scrapers for PTR filings
-import { Politician } from './politicians.js';
+
+export interface SimplePolitician {
+  lastName: string;
+  fullName: string;
+  party: string;
+  state: string;
+  chamber: 'house' | 'senate';
+}
 
 export interface FilingResult {
   filing_id: string;
   pdf_url: string;
   year: number;
-  politician: Politician;
+  politician: SimplePolitician;
 }
 
 export class HouseScraper {
   private baseUrl = 'https://disclosures-clerk.house.gov';
 
-  async searchFilings(politician: Politician, year: number): Promise<FilingResult[]> {
+  async searchFilings(politician: SimplePolitician, year: number): Promise<FilingResult[]> {
     const formData = new URLSearchParams({
       LastName: politician.lastName,
       State: '',
@@ -77,7 +84,7 @@ export class HouseScraper {
 export class SenateScraper {
   private baseUrl = 'https://efdsearch.senate.gov';
 
-  async searchFilings(politician: Politician, year: number): Promise<FilingResult[]> {
+  async searchFilings(politician: SimplePolitician, year: number): Promise<FilingResult[]> {
     const startDate = `01/01/${year}`;
     const endDate = `12/31/${year}`;
     

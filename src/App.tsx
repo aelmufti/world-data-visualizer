@@ -11,6 +11,7 @@ import Navbar from './components/Navbar'
 import StockMarketTab from './components/StockMarket/StockMarketTab'
 import PoliticianTradingTab from './components/PoliticianTradingTab'
 import CongressTrackerTab from './components/CongressTrackerTab'
+import OverviewTab from './components/OverviewTab'
 import { useAIS } from './contexts/AISContext'
 
 function SectorialAnalysis() {
@@ -218,8 +219,10 @@ export default function App() {
   
   // Determine active section based on route
   const getActiveSection = () => {
+    if (location.pathname === '/overview') return 'overview'
     if (location.pathname === '/stock-market') return 'stock-market'
     if (location.pathname === '/politician-trading') return 'politician-trading'
+    if (location.pathname === '/congress-tracker') return 'congress-tracker'
     if (location.pathname === '/portfolio') return 'portfolio'
     if (location.pathname === '/alerts') return 'alerts'
     if (location.pathname === '/settings') return 'settings'
@@ -248,6 +251,7 @@ export default function App() {
       {/* Routes */}
       <Routes>
         <Route path="/" element={<SectorialAnalysis />} />
+        <Route path="/overview" element={<OverviewTab />} />
         <Route path="/stock-market" element={<StockMarketTab />} />
         <Route path="/politician-trading" element={<PoliticianTradingTab />} />
         <Route path="/congress-tracker" element={<CongressTrackerTab />} />
