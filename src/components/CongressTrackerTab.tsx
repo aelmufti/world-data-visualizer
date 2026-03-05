@@ -171,7 +171,7 @@ export default function CongressTrackerTab() {
             <strong>{latestTrade.full_name}</strong> ({latestTrade.party}-{latestTrade.state})
           </div>
           <div style={{ fontSize: 12, color: '#4a5568' }}>
-            {latestTrade.action} <strong style={{ color: '#667eea' }}>{latestTrade.ticker}</strong> · {latestTrade.amount_label}
+            {latestTrade.action} <strong style={{ color: '#3B82F6' }}>{latestTrade.ticker}</strong> · {latestTrade.amount_label}
           </div>
         </div>
       )}
@@ -190,7 +190,7 @@ export default function CongressTrackerTab() {
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'linear-gradient(145deg, #667eea, #764ba2)',
+            background: 'linear-gradient(145deg, #3B82F6, #2563EB)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

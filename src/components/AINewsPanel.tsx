@@ -59,7 +59,7 @@ export default function AINewsPanel({ sector }: Props) {
       )
       
       if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des actualités')
+        throw new Error('Error fetching news')
       }
       
       const data = await response.json()
@@ -117,7 +117,7 @@ export default function AINewsPanel({ sector }: Props) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, paddingBottom: 14, borderBottom: "2px solid rgba(163, 177, 198, 0.2)" }}>
         <div>
           <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: "#718096", textTransform: "uppercase", fontWeight: 600 }}>
-            📰 Actualités · {sector.label}
+            📰 News · {sector.label}
           </span>
           {lastUpdate && (
             <div style={{ fontSize: 10, color: "#a0aec0", marginTop: 6, fontWeight: 500 }}>
@@ -160,7 +160,7 @@ export default function AINewsPanel({ sector }: Props) {
         </div>
       ) : news.length === 0 ? (
         <div style={{ textAlign: "center", padding: 40, color: "#64748B", fontSize: 13 }}>
-          Aucune actualité pertinente pour ce secteur
+          No relevant news for this sector
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

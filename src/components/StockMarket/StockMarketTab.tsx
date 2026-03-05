@@ -290,7 +290,7 @@ export default function StockMarketTab() {
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'linear-gradient(145deg, #667eea, #764ba2)',
+            background: 'linear-gradient(145deg, #3B82F6, #2563EB)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -306,7 +306,7 @@ export default function StockMarketTab() {
               color: '#2d3748',
               lineHeight: 1.2
             }}>
-              Marché Boursier
+              Stock Market
             </h1>
             <p style={{
               fontSize: 13,
@@ -314,7 +314,7 @@ export default function StockMarketTab() {
               marginTop: 4,
               fontWeight: 500
             }}>
-              Données en temps réel · {state.watchlist.length} actions suivies
+              Real-time data · {state.watchlist.length} stocks tracked
             </p>
           </div>
         </div>
@@ -334,7 +334,7 @@ export default function StockMarketTab() {
               onClick={() => handleViewChange(view)}
               style={{
                 padding: '10px 18px',
-                background: state.activeView === view ? 'linear-gradient(145deg, #667eea, #764ba2)' : '#e0e5ec',
+                background: state.activeView === view ? 'linear-gradient(145deg, #3B82F6, #2563EB)' : '#e0e5ec',
                 border: 'none',
                 borderRadius: 10,
                 color: state.activeView === view ? '#fff' : '#4a5568',

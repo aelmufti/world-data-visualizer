@@ -119,7 +119,7 @@ export default function PoliticianTradingTab() {
                 width: 52,
                 height: 52,
                 borderRadius: '50%',
-                background: 'linear-gradient(145deg, #667eea, #764ba2)',
+                background: 'linear-gradient(145deg, #3B82F6, #2563EB)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

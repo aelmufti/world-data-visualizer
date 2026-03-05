@@ -100,7 +100,7 @@ export default function CompanyInfoPanel() {
       {/* Search */}
       <form onSubmit={handleSearch} style={{ marginBottom: 20 }}>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: "#718096", textTransform: "uppercase", marginBottom: 14, fontWeight: 600, paddingBottom: 12, borderBottom: "2px solid rgba(163, 177, 198, 0.2)" }}>
-          🔍 Recherche d'Entreprise
+          🔍 Company Search
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <input
@@ -126,7 +126,7 @@ export default function CompanyInfoPanel() {
             type="submit"
             disabled={loading || !searchQuery.trim()}
             style={{
-              background: loading ? "#cbd5e0" : "linear-gradient(145deg, #667eea, #764ba2)",
+              background: loading ? "#cbd5e0" : "linear-gradient(145deg, #3B82F6, #2563EB)",
               border: "none",
               borderRadius: "12px",
               padding: "12px 24px",
@@ -139,7 +139,7 @@ export default function CompanyInfoPanel() {
               transition: "all 0.3s"
             }}
           >
-            {loading ? "..." : "Rechercher"}
+            {loading ? "..." : "Search"}
           </button>
         </div>
       </form>
@@ -164,7 +164,7 @@ export default function CompanyInfoPanel() {
                 </div>
                 {companyInfo.company.sector && (
                   <div style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>
-                    Secteur: {companyInfo.company.sector}
+                    Sector: {companyInfo.company.sector}
                   </div>
                 )}
               </div>
@@ -231,11 +231,11 @@ export default function CompanyInfoPanel() {
           {/* News Articles */}
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: "#CBD5E1", marginBottom: 12 }}>
-              Actualités Récentes ({news.length})
+              Recent News ({news.length})
             </div>
             {news.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 20, color: "#64748B", fontSize: 12 }}>
-                Aucune actualité trouvée
+                No news found
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -302,7 +302,7 @@ export default function CompanyInfoPanel() {
 
       {!companyInfo && !loading && !error && (
         <div style={{ textAlign: 'center', padding: 40, color: "#64748B", fontSize: 13 }}>
-          Recherchez une entreprise par son ticker pour voir ses actualités et statistiques
+          Search for a company by ticker to view news and statistics
         </div>
       )}
     </div>

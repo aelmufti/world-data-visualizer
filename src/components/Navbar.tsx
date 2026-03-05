@@ -68,10 +68,9 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: '🏠', path: '/overview' },
-    { id: 'sectorial', label: 'Analyse Sectorielle', icon: '📊', path: '/' },
-    { id: 'stock-market', label: 'Marché Boursier', icon: '📈', path: '/stock-market' },
-    { id: 'congress-tracker', label: 'Congress Tracker', icon: '🗳️', path: '/congress-tracker' },
-    { id: 'settings', label: 'Paramètres', icon: '⚙️', path: '/settings' }
+    { id: 'sectorial', label: 'Sector Analysis', icon: '📊', path: '/' },
+    { id: 'stock-market', label: 'Stock Market', icon: '📈', path: '/stock-market' },
+    { id: 'congress-tracker', label: 'Congress Tracker', icon: '🗳️', path: '/congress-tracker' }
   ]
 
   return (
@@ -101,7 +100,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
         <div style={{
           width: 50,
           height: 50,
-          background: 'linear-gradient(145deg, #667eea, #764ba2)',
+          background: 'linear-gradient(145deg, #3B82F6, #2563EB)',
           borderRadius: '16px',
           display: 'flex',
           alignItems: 'center',
@@ -111,26 +110,27 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
           color: '#fff',
           boxShadow: "6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8)"
         }}>
-          M
+          📊
         </div>
         <div>
           <div style={{
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: 700,
             color: '#2d3748',
-            lineHeight: 1.3
+            lineHeight: 1.2,
+            marginBottom: 4
           }}>
-            Market Intelligence
+            Market Intel
           </div>
           <div style={{
-            fontSize: 10,
+            fontSize: 9,
             color: '#718096',
-            marginTop: 4,
             fontFamily: "'Inter', sans-serif",
-            letterSpacing: 1,
-            fontWeight: 500
+            letterSpacing: 1.2,
+            fontWeight: 600,
+            textTransform: 'uppercase'
           }}>
-            REAL-TIME ANALYTICS
+            Real-Time Analytics
           </div>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
         }}>
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
@@ -245,7 +245,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
                     </span>
                     <span style={{
                       fontSize: 9,
-                      color: '#667eea',
+                      color: '#3B82F6',
                       background: '#e0e5ec',
                       padding: '3px 8px',
                       borderRadius: '6px',
@@ -266,7 +266,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
                 fontSize: 12,
                 fontWeight: 500
               }}>
-                {isSearching ? 'Recherche en cours...' : 'Aucun résultat trouvé'}
+                {isSearching ? 'Searching...' : 'No results found'}
               </div>
             )}
           </div>
@@ -294,9 +294,9 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
                 gap: 12,
                 padding: '14px 16px',
                 background: isActive 
-                  ? `linear-gradient(145deg, ${item.id === 'overview' ? '#667eea20' : '#667eea15'}, ${item.id === 'overview' ? '#667eea10' : '#667eea08'})` 
+                  ? `linear-gradient(145deg, ${item.id === 'overview' ? '#3B82F620' : '#3B82F615'}, ${item.id === 'overview' ? '#3B82F610' : '#3B82F608'})` 
                   : '#e0e5ec',
-                color: isActive ? '#667eea' : '#4a5568',
+                color: isActive ? '#3B82F6' : '#4a5568',
                 border: 'none',
                 borderRadius: '14px',
                 cursor: 'pointer',
@@ -317,8 +317,8 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  background: '#667eea',
-                  boxShadow: '0 0 10px rgba(102, 126, 234, 0.6)'
+                  background: '#3B82F6',
+                  boxShadow: '0 0 10px rgba(59, 130, 246, 0.6)'
                 }} />
               )}
             </button>
@@ -326,7 +326,7 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
         })}
       </div>
 
-      {/* Bottom Section - Status & User */}
+      {/* Bottom Section - Status */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -470,58 +470,6 @@ export default function Navbar({ activeSection = 'sectorial' }: NavbarProps) {
               </div>
             </div>
           )}
-        </div>
-
-        {/* User Section */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '12px 14px',
-          background: '#e0e5ec',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.3s',
-          boxShadow: '6px 6px 12px rgba(163, 177, 198, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.8)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = 'inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.5)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '6px 6px 12px rgba(163, 177, 198, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.8)'
-        }}
-        >
-          <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            background: 'linear-gradient(145deg, #f6ad55, #ed8936)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 16,
-            fontWeight: 600,
-            color: '#fff',
-            boxShadow: '4px 4px 8px rgba(163, 177, 198, 0.4), -4px -4px 8px rgba(255, 255, 255, 0.8)'
-          }}>
-            U
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: '#2d3748'
-            }}>
-              User
-            </div>
-            <div style={{
-              fontSize: 11,
-              color: '#718096',
-              fontWeight: 500
-            }}>
-              View Profile
-            </div>
-          </div>
         </div>
       </div>
     </nav>

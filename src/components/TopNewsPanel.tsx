@@ -349,7 +349,7 @@ export default function TopNewsPanel({ sector }: Props) {
       {/* Top News List */}
       {topNews.length === 0 ? (
         <div style={{ textAlign: "center", padding: 40, color: "#64748B", fontSize: 13 }}>
-          {connected ? 'Chargement des actualités...' : 'Connexion au serveur...'}
+          {connected ? 'Loading news...' : 'Connecting to server...'}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
