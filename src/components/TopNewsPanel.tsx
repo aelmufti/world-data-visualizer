@@ -317,7 +317,7 @@ export default function TopNewsPanel({ sector }: Props) {
             style={{ 
               fontSize: 14, 
               fontWeight: 600, 
-              color: "#F1F5F9", 
+              color: "#0f172a", 
               textDecoration: "none",
               display: 'block',
               marginBottom: 8
@@ -391,13 +391,13 @@ export default function TopNewsPanel({ sector }: Props) {
                       flex: 1, 
                       fontSize: 14, 
                       fontWeight: 600, 
-                      color: "#F1F5F9", 
+                      color: "#0f172a", 
                       lineHeight: 1.4, 
                       textDecoration: "none",
                       transition: "color 0.2s"
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = "#60A5FA"}
-                    onMouseLeave={(e) => e.currentTarget.style.color = "#F1F5F9"}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "#3B82F6"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "#0f172a"}
                   >
                     {article.title}
                   </a>
