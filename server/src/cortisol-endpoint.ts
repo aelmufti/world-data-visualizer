@@ -1,11 +1,6 @@
 import express from 'express';
 import NodeCache from 'node-cache';
-import duckdb from 'duckdb';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getDatabase } from './database.js';
 
 const router = express.Router();
 const cache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
@@ -138,50 +133,34 @@ router.get('/', async (req, res) => {
     const vix = fearGreedData.stock?.vix || null;
 
     // Fetch news sentiment from database
-    const dbPath = path.join(__dirname, '../data/financial_news.duckdb');
+    const db = getDatabase();
     
-    // Use DuckDB to query sentiment data
-    const db = new duckdb.Database(dbPath, { readonly: true });
+    const sentimentResult = await db.all(`
+      SELECT AVG(raw_sentiment) as avg_sentiment, COUNT(*) as count
+      FROM articles
+      WHERE published_at >= current_timestamp - INTERVAL '24 hours'
+    `);
     
-    const queryPromise = new Promise<{ avg_sentiment: number | null; count: number }>((resolve, reject) => {
-      db.all(`
-        SELECT AVG(sentiment) as avg_sentiment, COUNT(*) as count
-        FROM articles
-        WHERE publishedAt >= datetime('now', '-24 hours')
-      `, (err: Error | null, rows: any[]) => {
-        if (err) {
-          reject(err);
-        } else {
-          const result = rows[0] || { avg_sentiment: null, count: 0 };
-          resolve(result);
-        }
-      });
-    });
+    console.log('📊 Cortisol debug - sentiment query result:', sentimentResult);
+    
+    const avgSentiment = sentimentResult[0]?.avg_sentiment || 0;
+    const newsCount = Number(sentimentResult[0]?.count || 0);
+    
+    console.log('📊 Cortisol debug - avgSentiment:', avgSentiment, 'newsCount:', newsCount);
 
-    try {
-      const sentimentResult = await queryPromise;
-      const avgSentiment = sentimentResult.avg_sentiment || 0;
-      const newsCount = sentimentResult.count || 0;
+    // Calculate cortisol level
+    const cortisolData = calculateCortisolLevel(
+      stockValue,
+      cryptoValue,
+      avgSentiment,
+      vix,
+      newsCount
+    );
 
-      db.close();
-
-      // Calculate cortisol level
-      const cortisolData = calculateCortisolLevel(
-        stockValue,
-        cryptoValue,
-        avgSentiment,
-        vix,
-        newsCount
-      );
-
-      // Cache for 10 minutes
-      cache.set('cortisol-level', cortisolData, 600);
-      
-      res.json(cortisolData);
-    } catch (dbError) {
-      db.close();
-      throw dbError;
-    }
+    // Cache for 10 minutes
+    cache.set('cortisol-level', cortisolData, 600);
+    
+    res.json(cortisolData);
   } catch (error: any) {
     console.error('Error calculating cortisol level:', error);
     

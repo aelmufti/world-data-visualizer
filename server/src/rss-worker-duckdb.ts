@@ -37,7 +37,6 @@ class RSSWorker {
   }
 
   async init() {
-    await initDatabase();
     this.db = getDatabase();
   }
 
@@ -178,3 +177,7 @@ class RSSWorker {
 }
 
 export { RSSWorker };
+
+// Start the worker if this file is run directly
+const worker = new RSSWorker();
+worker.run().catch(console.error);
